@@ -71,28 +71,63 @@ static constexpr size_t FindIfAttr(const AttrList& attrs, const Func& func,
 }  // namespace My::MySRefl::detail
 
 namespace My::MySRefl {
-// field : member variable, static or non-static
+// field : member variable/function, static or non-static
 
 // fields
 // attrs
 template <typename T>
 struct Type;
 
+template <typename Func>
+struct IsFunc : std::false_type {};
+
+template <typename Ret, typename... Args>
+struct IsFunc<Ret(Args...)> : std::true_type {};
+
+template <typename Ret, typename... Args>
+struct IsFunc<Ret(Args...) const> : std::true_type {};
+
+template <typename Func>
+static constexpr bool IsFunc_v = IsFunc<Func>::value;
+
+template <typename... Args>
+struct Overload {
+  template <typename R, typename T>
+  constexpr auto operator()(R (T::*ptr)(Args...)) const {
+    return ptr;
+  }
+
+  template <typename R, typename T>
+  constexpr auto operator()(R (T::*ptr)(Args...) const) const {
+    return ptr;
+  }
+
+  template <typename R>
+  constexpr auto operator()(R (*ptr)(Args...)) const {
+    return ptr;
+  }
+};
+
+template <typename... Args>
+constexpr Overload<Args...> overload_v{};
+
 template <typename T>
 struct FieldTraits;
 
-template <typename T, typename Object>
+template <typename Object, typename T>
 struct FieldTraits<T Object::*> {
-  using value_type = T;
   using object_type = Object;
+  using value_type = T;
   static constexpr bool is_static = false;
+  static constexpr bool is_function = IsFunc_v<T>;
 };
 
 template <typename T>
 struct FieldTraits<T*> {
-  using value_type = T;
   using object_type = void;
+  using value_type = T;
   static constexpr bool is_static = true;
+  static constexpr bool is_function = IsFunc_v<T>;
 };
 
 // name = "..."
@@ -104,12 +139,11 @@ struct EmptyType {};
 
 template <typename T = EmptyType>
 struct Attr {
-  constexpr Attr(std::string_view key, T value) noexcept
-      : key{key}, value{value} {}
+  constexpr Attr(std::string_view key, T value) : key{key}, value{value} {}
 
-  constexpr Attr(std::string_view key) noexcept : Attr{key, T{}} {}
+  constexpr Attr(std::string_view key) : Attr{key, T{}} {}
 
-  constexpr Attr() noexcept : Attr{"", T{}} {}
+  constexpr Attr() : Attr{"", T{}} {}
 
   std::string_view key;
   T value;
@@ -138,7 +172,7 @@ struct AttrList : std::tuple<Attrs...> {
   }
 
   constexpr size_t Find(std::string_view name) const {
-    return FindIf([key](auto&& attr) { return attr.key == key; });
+    return FindIf([key](auto attr) { return attr.key == key; });
   }
 
   constexpr bool Contains(std::string_view key) const {
@@ -146,7 +180,7 @@ struct AttrList : std::tuple<Attrs...> {
   }
 
   template <size_t N>
-  constexpr auto Get() const noexcept {
+  constexpr auto Get() const {
     static_assert(N != static_cast<size_t>(-1));
     return std::get<N>(*this);
   }
@@ -156,17 +190,28 @@ AttrList(Attrs...) -> AttrList<Attrs...>;
 
 template <typename T, typename AList>
 struct Field : FieldTraits<T> {
-  constexpr Field(std::string_view name, T ptr, AList attrs) noexcept
+  constexpr Field(std::string_view name, T ptr, AList attrs)
       : name{name}, ptr{ptr}, attrs{attrs} {}
 
   std::string_view name;
   T ptr;
   AList attrs;
+
+  template <typename U>
+  static constexpr bool ValueTypeIs() {
+    return std::is_same_v<T, U>;
+  }
+
+  template <typename U>
+  static constexpr bool ValueTypeIsSameWith(U u) {
+    return ValueTypeIs<U>();
+  }
 };
 
 template <typename T, typename AList>
 Field(std::string_view, T, AList) -> Field<T, AList>;
 
+// Field's (name, value_type) must be unique
 template <typename... Fields>
 struct FieldList : std::tuple<Fields...> {
   static constexpr size_t num_fields = sizeof...(Fields);
@@ -185,7 +230,17 @@ struct FieldList : std::tuple<Fields...> {
   }
 
   constexpr size_t Find(std::string_view name) const {
-    return FindIf([name](auto&& field) { return field.name == name; });
+    return FindIf([name](auto field) { return field.name == name; });
+  }
+
+  template <typename T>
+  constexpr size_t Find(std::string_view name, const T& value) const {
+    return FindIf([name, value](auto field) {
+      if constexpr (std::is_same_v<std::decay_t<T>, typename field::value_type>)
+        return field.name == name && field.value == value;
+      else
+        return false;
+    });
   }
 
   constexpr bool Contains(std::string_view name) const {
@@ -201,7 +256,7 @@ struct FieldList : std::tuple<Fields...> {
 template <class... Fields>
 FieldList(Fields...) -> FieldList<Fields...>;
 
-// non-static
+// non-static member variables
 template <typename T, typename Func>
 constexpr void ForEachFieldOf(T&& obj, const Func& func) {
   detail::ForEachFieldOf(
