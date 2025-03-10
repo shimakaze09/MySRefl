@@ -52,7 +52,7 @@ int main() {
       cout << "value : " << attr.value << endl;
   });
 
-  ForEachFieldOf(p, [](auto field) { cout << field << endl; });
+  ForEachVarOf(p, [](auto field) { cout << field << endl; });
 
   Type<Point>::fields.ForEach([](auto field) {
     if constexpr (field.is_static)

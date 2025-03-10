@@ -16,7 +16,7 @@ static constexpr void ForNonStaticFieldOf(T&& obj, const Func& func) {
 }
 
 template <typename T, typename Func, size_t... Ns>
-static constexpr void ForEachFieldOf(T&& obj, const Func& func,
+static constexpr void ForEachVarOf(T&& obj, const Func& func,
                                      std::index_sequence<Ns...>) {
   (ForNonStaticFieldOf<Ns>(obj, func), ...);
 }
@@ -258,8 +258,8 @@ FieldList(Fields...) -> FieldList<Fields...>;
 
 // non-static member variables
 template <typename T, typename Func>
-constexpr void ForEachFieldOf(T&& obj, const Func& func) {
-  detail::ForEachFieldOf(
+constexpr void ForEachVarOf(T&& obj, const Func& func) {
+  detail::ForEachVarOf(
       std::forward<T>(obj), func,
       std::make_index_sequence<Type<std::decay_t<T>>::fields.num_fields>{});
 }
