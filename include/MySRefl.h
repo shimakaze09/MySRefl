@@ -16,8 +16,8 @@ static constexpr void ForNonStaticFieldOf(T&& obj, const Func& func) {
 }
 
 template <typename T, typename Func, size_t... Ns>
-static constexpr void ForEachNonStaticFieldOf(T&& obj, const Func& func,
-                                              std::index_sequence<Ns...>) {
+static constexpr void ForEachFieldOf(T&& obj, const Func& func,
+                                     std::index_sequence<Ns...>) {
   (ForNonStaticFieldOf<Ns>(obj, func), ...);
 }
 
@@ -137,8 +137,18 @@ struct AttrList : std::tuple<Attrs...> {
                               std::make_index_sequence<num_attrs>{});
   }
 
+  constexpr size_t Find(std::string_view name) const {
+    return FindIf([key](auto&& attr) { return attr.key == key; });
+  }
+
   constexpr bool Contains(std::string_view key) const {
-    return Find([key](auto&& attr) { return attr.key == key; });
+    return Find(key) != static_cast<size_t>(-1);
+  }
+
+  template <size_t N>
+  constexpr auto Get() const noexcept {
+    static_assert(N != static_cast<size_t>(-1));
+    return std::get<N>(*this);
   }
 };
 template <class... Attrs>
@@ -178,21 +188,23 @@ struct FieldList : std::tuple<Fields...> {
     return FindIf([name](auto&& field) { return field.name == name; });
   }
 
-  template <size_t N>
-  constexpr auto Get() const {
-    return std::get<N>(*this);
-  }
-
   constexpr bool Contains(std::string_view name) const {
     return Find(name) != static_cast<size_t>(-1);
+  }
+
+  template <size_t N>
+  constexpr auto Get() const {
+    static_assert(N != static_cast<size_t>(-1));
+    return std::get<N>(*this);
   }
 };
 template <class... Fields>
 FieldList(Fields...) -> FieldList<Fields...>;
 
+// non-static
 template <typename T, typename Func>
-constexpr void ForEachNonStaticFieldOf(T&& obj, const Func& func) {
-  detail::ForEachNonStaticFieldOf(
+constexpr void ForEachFieldOf(T&& obj, const Func& func) {
+  detail::ForEachFieldOf(
       std::forward<T>(obj), func,
       std::make_index_sequence<Type<std::decay_t<T>>::fields.num_fields>{});
 }
