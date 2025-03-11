@@ -26,7 +26,7 @@ struct IndexSequenceTraits<std::index_sequence<N0, Ns...>> {
 template <typename List, typename Func, size_t... Ns>
 constexpr void ForEach(const List& list, const Func& func,
                        std::index_sequence<Ns...>) {
-  (func(list.Get<Ns>()), ...);
+  (func(list.template Get<Ns>()), ...);
 }
 
 template <typename List, typename Func, size_t... Ns>
@@ -34,8 +34,8 @@ constexpr size_t FindIf(const List& list, const Func& func,
                         std::index_sequence<Ns...>) {
   if constexpr (sizeof...(Ns) > 0) {
     using IST = IndexSequenceTraits<std::index_sequence<Ns...>>;
-    return func(list.Get<IST::head>()) ? IST::head
-                                       : FindIf(list, func, IST::tail);
+    return func(list.template Get<IST::head>()) ? IST::head
+                                                : FindIf(list, func, IST::tail);
   } else
     return static_cast<size_t>(-1);
 }
