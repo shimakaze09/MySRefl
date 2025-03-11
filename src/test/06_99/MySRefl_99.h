@@ -160,7 +160,7 @@ struct FieldList : detail::BaseList<Fields...> {
 template <typename... Fields>
 FieldList(Fields...) -> FieldList<Fields...>;
 template <typename T>
-struct TypeInfo;  // name, TypeInfoBase, fields, attrs
+struct TypeInfo;  // TypeInfoBase, name, fields, attrs
 
 template <typename... Ts>
 struct TypeInfoList : detail::BaseList<Ts...> {
