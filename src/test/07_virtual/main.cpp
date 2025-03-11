@@ -49,7 +49,7 @@ struct TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
 };
 
 template <>
-struct Ubpa::USRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
+struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
   static constexpr FieldList fields = FieldList{Field{"d", &D::d}};
 
   static constexpr AttrList attrs = {};
