@@ -276,21 +276,25 @@ TypeList(Types...) -> TypeList<Types...>;
 template <typename... Types>
 TypeList(std::tuple<Types...>) -> TypeList<Types...>;
 
-template <typename T, typename Func>
-constexpr void DFS(const Func& func) {
-  func(Type<T>{});
-  Type<T>::bases.ForEach([&](auto base) { DFS<decltype(base)>(func); });
-}
+template <typename Impl>
+struct TypeBase {
+  template <typename Func>
+  static constexpr void DFS(const Func& func) {
+    func(Impl{});
+    Impl::bases.ForEach([&](auto base) { base.DFS(func); });
+  }
 
-template <typename T, typename Func>
-constexpr void DFSof(T&& obj, const Func& func) {
-  func(std::forward<T>(obj));
-  Type<std::decay_t<T>>::bases.ForEach([&](auto base) {
-    DFSof(detail::forward_cast<typename decltype(base)::type>(
-              std::forward<T>(obj)),
-          func);
-  });
-}
+  template <typename T, typename Func>
+  static constexpr void DFSof(T&& obj, const Func& func) {
+    static_assert(std::is_same_v<typename Impl::type, std::decay_t<T>>);
+    func(std::forward<T>(obj));
+    Impl::bases.ForEach([&](auto base) {
+      base.DFSof(detail::forward_cast<typename decltype(base)::type>(
+                     std::forward<T>(obj)),
+                 func);
+    });
+  }
+};
 
 // non-static member variables
 template <typename T, typename Func>
@@ -302,6 +306,6 @@ constexpr void ForEachVarOf(T&& obj, const Func& func) {
             func(std::forward<decltype(rec_obj)>(inner_obj).*(field.value));
         });
   };
-  DFSof(std::forward<T>(obj), rec_func);
+  Type<std::decay_t<T>>::DFSof(std::forward<T>(obj), rec_func);
 }
 }  // namespace My::MySRefl

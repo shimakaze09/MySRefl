@@ -28,7 +28,7 @@ struct D : B, C {
 };
 
 template <>
-struct Type<A> {
+struct Type<A> : TypeBase<Type<A>> {
   static constexpr std::string_view name = "A";
   using type = A;
   static constexpr TypeList bases = {};
@@ -39,7 +39,7 @@ struct Type<A> {
 };
 
 template <>
-struct Type<B> {
+struct Type<B> : TypeBase<Type<B>> {
   static constexpr std::string_view name = "B";
   using type = B;
   static constexpr TypeList bases = {Type<A>{}};
@@ -50,7 +50,7 @@ struct Type<B> {
 };
 
 template <>
-struct Type<C> {
+struct Type<C> : TypeBase<Type<C>> {
   static constexpr std::string_view name = "C";
   using type = C;
   static constexpr TypeList bases = {Type<A>{}};
@@ -61,7 +61,7 @@ struct Type<C> {
 };
 
 template <>
-struct Type<D> {
+struct Type<D> : TypeBase<Type<D>> {
   static constexpr std::string_view name = "D";
   using type = D;
   static constexpr TypeList bases = {Type<B>{}, Type<C>{}};
