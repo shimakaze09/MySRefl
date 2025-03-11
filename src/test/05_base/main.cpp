@@ -28,10 +28,8 @@ struct D : B, C {
 };
 
 template <>
-struct Type<A> : TypeBase<Type<A>> {
+struct TypeInfo<A> : TypeInfoBase<TypeInfo<A>> {
   static constexpr std::string_view name = "A";
-  using type = A;
-  static constexpr TypeList bases = {};
 
   static constexpr FieldList fields = FieldList{Field{"a", &A::a, AttrList{}}};
 
@@ -39,10 +37,8 @@ struct Type<A> : TypeBase<Type<A>> {
 };
 
 template <>
-struct Type<B> : TypeBase<Type<B>> {
+struct TypeInfo<B> : TypeInfoBase<TypeInfo<B>, A> {
   static constexpr std::string_view name = "B";
-  using type = B;
-  static constexpr TypeList bases = {Type<A>{}};
 
   static constexpr FieldList fields = FieldList{Field{"b", &B::b, AttrList{}}};
 
@@ -50,10 +46,8 @@ struct Type<B> : TypeBase<Type<B>> {
 };
 
 template <>
-struct Type<C> : TypeBase<Type<C>> {
+struct TypeInfo<C> : TypeInfoBase<TypeInfo<C>, A> {
   static constexpr std::string_view name = "C";
-  using type = C;
-  static constexpr TypeList bases = {Type<A>{}};
 
   static constexpr FieldList fields = FieldList{Field{"c", &C::c, AttrList{}}};
 
@@ -61,10 +55,8 @@ struct Type<C> : TypeBase<Type<C>> {
 };
 
 template <>
-struct Type<D> : TypeBase<Type<D>> {
+struct TypeInfo<D> : TypeInfoBase<TypeInfo<D>, B, C> {
   static constexpr std::string_view name = "D";
-  using type = D;
-  static constexpr TypeList bases = {Type<B>{}, Type<C>{}};
 
   static constexpr FieldList fields = FieldList{Field{"d", &D::d, AttrList{}}};
 
@@ -75,15 +67,18 @@ template <typename T>
 void dump(size_t depth = 0) {
   for (size_t i = 0; i < depth; i++)
     cout << "  ";
-  cout << Type<T>::name << endl;
-  Type<T>::bases.ForEach(
+  cout << TypeInfo<T>::name << endl;
+  TypeInfo<T>::bases.ForEach(
       [depth](auto t) { dump<typename decltype(t)::type>(depth + 1); });
 }
 
 int main() {
   dump<D>();
 
-  Type<D>::fields.ForEach([](auto field) { cout << field.name << endl; });
+  TypeInfo<D>::fields.ForEach([](auto field) { cout << field.name << endl; });
+  TypeInfo<D>::DFS([](auto t) {
+    t.fields.ForEach([](auto field) { cout << field.name << endl; });
+  });
 
   D d;
   d.B::a = 1;
@@ -91,7 +86,7 @@ int main() {
   d.b = 3;
   d.c = 4;
   d.d = 5;
-  ForEachVarOf(std::move(d), [](auto&& var) {
+  TypeInfo<D>::DFS_ForEachVarOf(std::move(d), [](auto&& var) {
     static_assert(std::is_rvalue_reference_v<decltype(var)>);
     cout << var << endl;
   });
