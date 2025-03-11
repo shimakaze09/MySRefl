@@ -279,8 +279,7 @@ void test_function() {
   constexpr auto f0 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func0");
   cout << f0.name << endl;
-  constexpr auto f0_args =
-      MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
+  constexpr auto f0_args = MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
   f0_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -291,8 +290,7 @@ void test_function() {
   constexpr auto f1 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func1");
   cout << f1.name << endl;
-  constexpr auto f1_args =
-      MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
+  constexpr auto f1_args = MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
   f1_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -403,9 +401,12 @@ void test_virtual() {
   });
 }
 
+// ==============
+//  mask
+// ==============
 template <typename T, size_t... Ns>
 constexpr auto GetXID(std::index_sequence<Ns...>) {
-  // get fields with name "x" or "z"
+  // get fields with name "x" or "id"
   constexpr auto masks = TypeInfo<T>::fields.Accumulate(
       std::array<bool, TypeInfo<T>::fields.size>{},
       [&, idx = 0](auto acc, auto field) mutable {
@@ -413,7 +414,7 @@ constexpr auto GetXID(std::index_sequence<Ns...>) {
         idx++;
         return acc;
       });
-  constexpr auto fields = TypeInfo<T>::fields.Accumulate<masks[Ns]...>(
+  constexpr auto fields = TypeInfo<T>::fields.template Accumulate<masks[Ns]...>(
       ElemList<>{}, [&](auto acc, auto field) { return acc.Push(field); });
   return fields;
 }
@@ -425,7 +426,7 @@ constexpr auto GetXID() {
 
 void test_mask() {
   cout << "====================" << endl
-       << " virtual" << endl
+       << " mask" << endl
        << "====================" << endl;
 
   // get fields with name "x" or "id"
@@ -440,6 +441,7 @@ int main() {
   test_inheritance();
   test_function();
   test_virtual();
+  test_mask();
 
   return 0;
 }
