@@ -14,12 +14,6 @@ struct IsInstance : std::false_type {};
 template <template <typename...> class U, typename... Ts>
 struct IsInstance<U<Ts...>, U> : std::true_type {};
 
-template <typename List, typename Func, size_t... Ns>
-constexpr void ForEach(const List& list, const Func& func,
-                       std::index_sequence<Ns...>) {
-  (func(std::get<Ns>(list)), ...);
-}
-
 template <typename Indices>
 struct IndexSequenceTraits;
 
@@ -30,12 +24,18 @@ struct IndexSequenceTraits<std::index_sequence<N0, Ns...>> {
 };
 
 template <typename List, typename Func, size_t... Ns>
+constexpr void ForEach(const List& list, const Func& func,
+                       std::index_sequence<Ns...>) {
+  (func(list.Get<Ns>()), ...);
+}
+
+template <typename List, typename Func, size_t... Ns>
 constexpr size_t FindIf(const List& list, const Func& func,
                         std::index_sequence<Ns...>) {
   if constexpr (sizeof...(Ns) > 0) {
     using IST = IndexSequenceTraits<std::index_sequence<Ns...>>;
-    return func(std::get<IST::head>(list)) ? IST::head
-                                           : FindIf(list, func, IST::tail);
+    return func(list.Get<IST::head>()) ? IST::head
+                                       : FindIf(list, func, IST::tail);
   } else
     return static_cast<size_t>(-1);
 }
@@ -92,12 +92,12 @@ struct BaseList {
 
   template <typename Func>
   constexpr void ForEach(const Func& func) const {
-    detail::ForEach(list, func, std::make_index_sequence<size>{});
+    detail::ForEach(*this, func, std::make_index_sequence<size>{});
   }
 
   template <typename Func>
   constexpr size_t FindIf(const Func& func) const {
-    return detail::FindIf(list, func, std::make_index_sequence<size>{});
+    return detail::FindIf(*this, func, std::make_index_sequence<size>{});
   }
 
   constexpr size_t Find(std::string_view name) const {
