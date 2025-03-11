@@ -33,8 +33,7 @@ struct Type<A> {
   using type = A;
   static constexpr TypeList subclasses = {};
 
-  static constexpr FieldList fields =
-      FieldList{Field{"a", &A::a, AttrList{}}}.UnionTypeList(subclasses);
+  static constexpr FieldList fields = FieldList{Field{"a", &A::a, AttrList{}}};
 
   static constexpr AttrList attrs = {};
 };
@@ -45,8 +44,7 @@ struct Type<B> {
   using type = B;
   static constexpr TypeList subclasses = {};
 
-  static constexpr FieldList fields =
-      FieldList{Field{"b", &B::b, AttrList{}}}.UnionTypeList(subclasses);
+  static constexpr FieldList fields = FieldList{Field{"b", &B::b, AttrList{}}};
 
   static constexpr AttrList attrs = {};
 };
@@ -57,8 +55,7 @@ struct Type<C> {
   using type = C;
   static constexpr TypeList subclasses = {Type<A>{}};
 
-  static constexpr FieldList fields =
-      FieldList{Field{"c", &C::c, AttrList{}}}.UnionTypeList(subclasses);
+  static constexpr FieldList fields = FieldList{Field{"c", &C::c, AttrList{}}};
 
   static constexpr AttrList attrs = {};
 };
@@ -69,8 +66,7 @@ struct Type<D> {
   using type = D;
   static constexpr TypeList subclasses = {Type<B>{}, Type<C>{}};
 
-  static constexpr FieldList fields =
-      FieldList{Field{"d", &D::d, AttrList{}}}.UnionTypeList(subclasses);
+  static constexpr FieldList fields = FieldList{Field{"d", &D::d, AttrList{}}};
 
   static constexpr AttrList attrs = {};
 };
@@ -87,5 +83,6 @@ void dump(size_t depth = 0) {
 int main() {
   dump<D>();
 
+  // TODO: walk recursively
   Type<D>::fields.ForEach([](auto field) { cout << field.name << endl; });
 }
