@@ -41,14 +41,14 @@ int main() {
       [](auto field) { cout << field.name << endl; });
 
   static_assert(
-      MySRefl_BaseList_GetByName(TypeInfo<Color>::fields, "RED").value ==
+      MySRefl_ElemList_GetByName(TypeInfo<Color>::fields, "RED").value ==
       Color::RED);
   static_assert(
-      MySRefl_BaseList_GetByValue(TypeInfo<Color>::fields, Color::RED).name ==
+      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::RED).name ==
       "RED");
 
   constexpr Color c = Color::GREEN;
   constexpr auto c_attr =
-      MySRefl_BaseList_GetByValue(TypeInfo<Color>::fields, c).attrs;
-  static_assert(MySRefl_BaseList_GetByName(c_attr, "func").value() == 2);
+      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, c).attrs;
+  static_assert(MySRefl_ElemList_GetByName(c_attr, "func").value() == 2);
 }

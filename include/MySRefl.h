@@ -23,10 +23,17 @@ struct IndexSequenceTraits<std::index_sequence<N0, Ns...>> {
   static constexpr auto tail = std::index_sequence<Ns...>{};
 };
 
-template <typename List, typename Func, size_t... Ns>
-constexpr void ForEach(const List& list, Func&& func,
-                       std::index_sequence<Ns...>) {
-  (func(list.template Get<Ns>()), ...);
+template <typename List, typename Func, typename Acc, size_t... Ns>
+constexpr auto Accumulate(const List& list, Func&& func, Acc&& acc,
+                          std::index_sequence<Ns...>) {
+  if constexpr (sizeof...(Ns) > 0) {
+    using IST = IndexSequenceTraits<std::index_sequence<Ns...>>;
+    return Accumulate(
+        list, std::forward<Func>(func),
+        func(std::forward<Acc>(acc), list.template Get<IST::head>()),
+        IST::tail);
+  } else
+    return acc;
 }
 
 template <typename List, typename Func, size_t... Ns>
@@ -72,16 +79,23 @@ struct NamedValue<void> : NamedValueBase<void> {
 
 // Elems has name
 template <typename... Elems>
-struct BaseList {
+struct ElemList {
   std::tuple<Elems...> list;
   static constexpr size_t size = sizeof...(Elems);
 
-  constexpr BaseList(Elems... elems) : list{elems...} {}
+  constexpr ElemList(Elems... elems) : list{elems...} {}
+
+  template <typename Func, typename Acc>
+  constexpr auto Accumulate(Acc&& acc, Func&& func) const {
+    return detail::Accumulate(*this, std::forward<Func>(func),
+                              std::forward<Acc>(acc),
+                              std::make_index_sequence<size>{});
+  }
 
   template <typename Func>
   constexpr void ForEach(Func&& func) const {
-    detail::ForEach(*this, std::forward<Func>(func),
-                    std::make_index_sequence<size>{});
+    std::apply([&](auto... elems) { (std::forward<Func>(func)(elems), ...); },
+               list);
   }
 
   template <typename Func>
@@ -117,11 +131,22 @@ struct BaseList {
     return std::get<N>(list);
   }
 
+  template <typename Elem>
+  constexpr auto UniqueInsert(Elem e) const {
+    if constexpr ((std::is_same_v<Elems, Elem> || ...))
+      return *this;
+    else {
+      return std::apply(
+          [e](auto... elems) { return ElemList<Elems..., Elem>{elems..., e}; },
+          list);
+    }
+  }
+
 // name must be constexpr std::string_view
-#define MySRefl_BaseList_GetByName(list, name) list.Get<list.Find(name)>()
+#define MySRefl_ElemList_GetByName(list, name) list.Get<list.Find(name)>()
 
 // value must be constexpr
-#define MySRefl_BaseList_GetByValue(list, value) \
+#define MySRefl_ElemList_GetByValue(list, value) \
   list.Get<list.FindByValue(value)>()
 };
 }  // namespace My::MySRefl::detail
@@ -207,10 +232,10 @@ Attr(std::string_view, const char (&)[N]) -> Attr<std::string_view>;
 Attr(std::string_view) -> Attr<void>;
 
 template <typename... Attrs>
-struct AttrList : detail::BaseList<Attrs...> {
+struct AttrList : detail::ElemList<Attrs...> {
   static_assert((detail::IsInstance<Attrs, Attr>::value && ...));
 
-  constexpr AttrList(Attrs... attrs) : detail::BaseList<Attrs...>{attrs...} {}
+  constexpr AttrList(Attrs... attrs) : detail::ElemList<Attrs...>{attrs...} {}
 };
 
 template <typename T, typename AList>
@@ -234,42 +259,35 @@ struct TypeInfoList;  // forward declaration
 
 // Field's (name, value_type) must be unique
 template <typename... Fields>
-struct FieldList : detail::BaseList<Fields...> {
+struct FieldList : detail::ElemList<Fields...> {
   static_assert((detail::IsInstance<Fields, Field>::value && ...));
   constexpr FieldList(Fields... fields)
-      : detail::BaseList<Fields...>{fields...} {};
+      : detail::ElemList<Fields...>{fields...} {};
 };
 
 // name, type, bases, fields, attrs,
 template <typename T>
 struct TypeInfo;
-template <typename Info>
-struct TypeInfoType;
 
-template <typename T>
-struct TypeInfoType<TypeInfo<T>> {
-  using type = T;
+template <typename T, bool IsVirtual = false>
+struct Base {
+  static constexpr auto info = TypeInfo<T>{};
+  static constexpr bool is_virtual = IsVirtual;
 };
 
-template <typename T>
-constexpr auto TypeInfoOf(T&&) {
-  return TypeInfo<std::decay_t<T>>{};
-}
-
-template <typename... TypeInfos>
-struct TypeInfoList : detail::BaseList<TypeInfos...> {
-  static_assert((detail::IsInstance<TypeInfos, TypeInfo>::value && ...));
-  constexpr TypeInfoList(TypeInfos... typeInfos)
-      : detail::BaseList<TypeInfos...>{typeInfos...} {};
+template <typename... Bases>
+struct BaseList : detail::ElemList<Bases...> {
+  // static_assert((detail::IsInstance<Bases, Base>::value&&...));
+  constexpr BaseList(Bases... bases) : detail::ElemList<Bases...>{bases...} {};
 };
 
 template <typename T, typename... Bases>
 struct TypeInfoBase {
   using type = T;
-  static constexpr TypeInfoList bases = {TypeInfo<Bases>{}...};
+  static constexpr BaseList bases = {Bases{}...};
 
   template <typename Derived>
-  constexpr auto&& Forward(Derived&& derived) noexcept {
+  static constexpr auto&& Forward(Derived&& derived) noexcept {
     static_assert(std::is_base_of_v<type, std::decay_t<Derived>>);
     using DecayDerived = std::decay_t<Derived>;
     if constexpr (std::is_same_v<const DecayDerived&, Derived>)
@@ -282,24 +300,54 @@ struct TypeInfoBase {
       static_assert(true);  // volitile
   }
 
-  template <typename Func>
-  static constexpr void DFS(Func&& func, size_t depth = 0) {
-    func(TypeInfo<type>{}, depth);
-    TypeInfo<type>::bases.ForEach(
-        [&](auto base) { base.DFS(std::forward<Func>(func), depth + 1); });
+  static constexpr auto GetVirtualBases() {
+    return bases.Accumulate(detail::ElemList<>{}, [](auto acc, auto base) {
+      constexpr auto vbs = base.info.GetVirtualBases();
+      auto concated = vbs.Accumulate(
+          acc, [](auto acc, auto vb) { return acc.UniqueInsert(vb); });
+      if constexpr (base.is_virtual)
+        return concated.UniqueInsert(base.info);
+      else
+        return concated;
+    });
+  }
+
+  template <typename Func, size_t Depth = 0>
+  static constexpr void DFS(Func&& func) {
+    func(TypeInfo<type>{}, Depth);
+    if constexpr (Depth == 0) {
+      GetVirtualBases().ForEach([&](auto vb) { func(vb, 1); });
+    }
+    bases.ForEach([&](auto base) {
+      if constexpr (!base.is_virtual)
+        base.info.DFS<Func, Depth + 1>(std::forward<Func>(func));
+    });
   }
 
   template <typename U, typename Func>
-  static constexpr void ForEachVarOf(U&& obj, Func&& func) {
+  static constexpr void ForEachNonVirtualVarOf(U&& obj, Func&& func) {
     static_assert(std::is_same_v<type, std::decay_t<U>>);
     TypeInfo<type>::fields.ForEach([&](auto field) {
       if constexpr (!field.is_static && !field.is_func)
         std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
     });
     TypeInfo<type>::bases.ForEach([&](auto base) {
-      base.ForEachVarOf(base.Forward(std::forward<U>(obj)),
-                        std::forward<Func>(func));
+      if constexpr (!base.is_virtual)
+        base.info.ForEachNonVirtualVarOf(
+            base.info.Forward(std::forward<U>(obj)), std::forward<Func>(func));
     });
+  }
+
+  template <typename U, typename Func>
+  static constexpr void ForEachVarOf(U&& obj, Func&& func) {
+    static_assert(std::is_same_v<type, std::decay_t<U>>);
+    GetVirtualBases().ForEach([&](auto vb) {
+      vb.fields.ForEach([&](auto field) {
+        if constexpr (!field.is_static && !field.is_func)
+          std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
+      });
+    });
+    ForEachNonVirtualVarOf(std::forward<U>(obj), std::forward<Func>(func));
   }
 };
 }  // namespace My::MySRefl
