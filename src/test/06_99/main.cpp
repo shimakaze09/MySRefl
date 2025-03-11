@@ -28,8 +28,7 @@ struct TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr FieldList fields = {
       Field{"x", &Point::x, AttrList{Attr{"not_serialize"}}},
       Field{"y", &Point::y, AttrList{Attr{"info", "hello"}}},
-      Field{"id", &Point::id, AttrList{}},
-      Field{"Sum", &Point::Sum, AttrList{}}};
+      Field{"id", &Point::id}, Field{"Sum", &Point::Sum}};
 
   static constexpr AttrList attrs = {Attr{"size", 8}};
 };
@@ -132,7 +131,7 @@ template <>
 struct TypeInfo<A> : TypeInfoBase<A> {
   static constexpr std::string_view name = "A";
 
-  static constexpr FieldList fields = {Field{"a", &A::a, AttrList{}}};
+  static constexpr FieldList fields = {Field{"a", &A::a}};
 
   static constexpr AttrList attrs = {};
 };
@@ -141,7 +140,7 @@ template <>
 struct TypeInfo<B> : TypeInfoBase<B, A> {
   static constexpr std::string_view name = "B";
 
-  static constexpr FieldList fields = {Field{"b", &B::b, AttrList{}}};
+  static constexpr FieldList fields = {Field{"b", &B::b}};
 
   static constexpr AttrList attrs = {};
 };
@@ -150,7 +149,7 @@ template <>
 struct TypeInfo<C> : TypeInfoBase<C, A> {
   static constexpr std::string_view name = "C";
 
-  static constexpr FieldList fields = FieldList{Field{"c", &C::c, AttrList{}}};
+  static constexpr FieldList fields = FieldList{Field{"c", &C::c}};
 
   static constexpr AttrList attrs = {};
 };
@@ -159,7 +158,7 @@ template <>
 struct TypeInfo<D> : TypeInfoBase<D, B, C> {
   static constexpr std::string_view name = "D";
 
-  static constexpr FieldList fields = FieldList{Field{"d", &D::d, AttrList{}}};
+  static constexpr FieldList fields = FieldList{Field{"d", &D::d}};
 
   static constexpr AttrList attrs = {};
 };

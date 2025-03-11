@@ -31,7 +31,7 @@ template <>
 struct TypeInfo<A> : TypeInfoBase<A> {
   static constexpr std::string_view name = "A";
 
-  static constexpr FieldList fields = FieldList{Field{"a", &A::a, AttrList{}}};
+  static constexpr FieldList fields = FieldList{Field{"a", &A::a}};
 
   static constexpr AttrList attrs = {};
 };
@@ -40,7 +40,7 @@ template <>
 struct TypeInfo<B> : TypeInfoBase<B, A> {
   static constexpr std::string_view name = "B";
 
-  static constexpr FieldList fields = FieldList{Field{"b", &B::b, AttrList{}}};
+  static constexpr FieldList fields = FieldList{Field{"b", &B::b}};
 
   static constexpr AttrList attrs = {};
 };
@@ -49,7 +49,7 @@ template <>
 struct TypeInfo<C> : TypeInfoBase<C, A> {
   static constexpr std::string_view name = "C";
 
-  static constexpr FieldList fields = FieldList{Field{"c", &C::c, AttrList{}}};
+  static constexpr FieldList fields = FieldList{Field{"c", &C::c}};
 
   static constexpr AttrList attrs = {};
 };
@@ -58,7 +58,7 @@ template <>
 struct TypeInfo<D> : TypeInfoBase<D, B, C> {
   static constexpr std::string_view name = "D";
 
-  static constexpr FieldList fields = FieldList{Field{"d", &D::d, AttrList{}}};
+  static constexpr FieldList fields = FieldList{Field{"d", &D::d}};
 
   static constexpr AttrList attrs = {};
 };

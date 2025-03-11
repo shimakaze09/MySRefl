@@ -79,10 +79,10 @@ struct BaseList {
 
   template <typename T>
   constexpr size_t FindByValue(T value) const {
-    return FindIf([value](auto elem) {
-      if constexpr (elem.has_value) {
-        if constexpr (std::is_same_v<decltype(elem.value), T>)
-          return elem.value == value;
+    return FindIf([value](auto e) {
+      if constexpr (e.has_value) {
+        if constexpr (std::is_same_v<decltype(e.value), T>)
+          return e.value == value;
         else
           return false;
       } else
@@ -143,12 +143,14 @@ template <typename T, typename AList>
 struct Field : FTraits<T>, detail::NamedValue<T> {
   AList attrs;
 
-  constexpr Field(std::string_view n, T v, AList as)
+  constexpr Field(std::string_view n, T v, AList as = {})
       : detail::NamedValue<T>{n, v}, attrs{as} {}
 };
 
 template <typename T, typename AList>
 Field(std::string_view, T, AList) -> Field<T, AList>;
+template <typename T>
+Field(std::string_view, T) -> Field<T, AttrList<>>;
 
 template <typename... Fields>
 struct FieldList : detail::BaseList<Fields...> {
