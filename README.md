@@ -12,15 +12,13 @@
     - (non-static / static) member variable
     - (non-static / static) member function
 - attribute
-    - class
-        - member variable
-        - member function
-    - enum
-        - enumerator
+- enum
+    - string <-> key
+    - static dispatch
 - template
 - inheritance
     - inherit field (member variable, member function)
-    - iterate subclasses recursively
+    - iterate bases recursively
 
 ## Example
 
