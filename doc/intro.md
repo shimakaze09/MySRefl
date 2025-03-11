@@ -9,9 +9,12 @@ All you need to do is writing a declaration for the class which needs to be refl
 The declaration is simple enough that we don't need any marco to simplify it.
 
 The library is well-designed so it's very tiny (only 99 lines), so it's easy to get the whole idea of this
-library. [MySRefl_99.h](../include/MySRefl_99.h) is condensed from  [MySRefl.h](../include/MySRefl.h) which is much
-easier to read.
-Both of them have the same API (but in different name spaces).
+library. [MySRefl_99.h](../include/MySRefl_99.h) is condensed from  [MySRefl.h](../include/MySRefl/MySRefl.h) which is
+much easier to read. Both of them have the same API.
+
+> the difference between MySRefl_99.h and MySRefl.h
+>
+> - `name`
 
 ## 1. Design
 
@@ -68,7 +71,9 @@ Then we need to write a declaration for it.
  ```c++
  template<>
  struct TypeInfo<Point> : TypeInfoBase<Point> {
-   static constexpr std::string_view name = "Point";
+   // the name is declared by TypeInfoBase<Point>
+   // if you use USRefl_99.h, you should declare it here.
+   // static constexpr std::string_view name = "struct Point";
  
    static constexpr FieldList fields = {
      Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},

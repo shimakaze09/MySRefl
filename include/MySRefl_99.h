@@ -2,48 +2,48 @@
 // Created by Admin on 11/03/2025.
 //
 
-#pragma once  // My Static Reflection 99 (now 96)
+#pragma once            // My Static Reflection -- 99 lines
+#include <string_view>  // Repository: https://github.com/shimakaze09/MySRefl
+#include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/main/LICENSE
 
-#include <string_view>
-#include <tuple>
-
+namespace My::MySRefl::detail {
 template <typename L, typename F>
-constexpr size_t detail_FindIf(L, F&&, std::index_sequence<>) {
+constexpr size_t FindIf(L, F&&, std::index_sequence<>) {
   return -1;
 }
 
 template <typename L, typename F, size_t N0, size_t... Ns>
-constexpr size_t detail_FindIf(L l, F&& f, std::index_sequence<N0, Ns...>) {
-  return f(l.template Get<N0>()) ? N0
-                                 : detail_FindIf(l, std::forward<F>(f),
-                                                 std::index_sequence<Ns...>{});
+constexpr size_t FindIf(L l, F&& f, std::index_sequence<N0, Ns...>) {
+  return f(l.template Get<N0>())
+             ? N0
+             : FindIf(l, std::forward<F>(f), std::index_sequence<Ns...>{});
 }
 
 template <typename L, typename F, typename R>
-constexpr auto detail_Acc(L, F&&, R&& r, std::index_sequence<>) {
+constexpr auto Acc(L, F&&, R&& r, std::index_sequence<>) {
   return r;
 }
 
 template <typename L, typename F, typename R, size_t N0, size_t... Ns>
-constexpr auto detail_Acc(L l, F&& f, R&& r, std::index_sequence<N0, Ns...>) {
-  return detail_Acc(l, std::forward<F>(f),
-                    f(std::forward<R>(r), l.template Get<N0>()),
-                    std::index_sequence<Ns...>{});
+constexpr auto Acc(L l, F&& f, R&& r, std::index_sequence<N0, Ns...>) {
+  return Acc(l, std::forward<F>(f), f(std::forward<R>(r), l.template Get<N0>()),
+             std::index_sequence<Ns...>{});
 }
 
 template <typename TI, typename U, typename F>
-constexpr void detail_NV_Var(TI info, U&& obj, F&& f) {
+constexpr void NV_Var(TI info, U&& obj, F&& f) {
   info.fields.ForEach([&](auto fld) {
     if constexpr (!fld.is_static && !fld.is_func)
       std::forward<F>(f)(std::forward<U>(obj).*(fld.value));
   });
   info.bases.ForEach([&](auto b) {
     if constexpr (!b.is_virtual)
-      detail_NV_Var(b.info, b.info.Forward(std::forward<U>(obj)),
-                    std::forward<F>(f));
+      NV_Var(b.info, b.info.Forward(std::forward<U>(obj)), std::forward<F>(f));
   });
 }
+}  // namespace My::MySRefl::detail
 
+namespace My::MySRefl {
 template <typename T>
 struct NamedValue {  // named value
   std::string_view name;
@@ -84,14 +84,15 @@ struct ElemList {  // Elems is a named value
 
   template <typename Func, typename Init>
   constexpr auto Accumulate(Init&& init, Func&& func) const {
-    return detail_Acc(*this, std::forward<Func>(func), std::forward<Init>(init),
-                      std::make_index_sequence<sizeof...(Elems)>{});
+    return detail::Acc(*this, std::forward<Func>(func),
+                       std::forward<Init>(init),
+                       std::make_index_sequence<sizeof...(Elems)>{});
   }
 
   template <typename Func>
   constexpr size_t FindIf(Func&& func) const {
-    return detail_FindIf(*this, std::forward<Func>(func),
-                         std::make_index_sequence<sizeof...(Elems)>{});
+    return detail::FindIf(*this, std::forward<Func>(func),
+                          std::make_index_sequence<sizeof...(Elems)>{});
   }
 
   constexpr size_t Find(std::string_view n) const {
@@ -233,8 +234,8 @@ struct TypeInfoBase {
           std::forward<Func>(func)(std::forward<U>(obj).*(fld.value));
       });
     });
-    detail_NV_Var(TypeInfo<type>{}, std::forward<U>(obj),
-                  std::forward<Func>(func));
+    detail::NV_Var(TypeInfo<type>{}, std::forward<U>(obj),
+                   std::forward<Func>(func));
   }
 };
 
@@ -245,3 +246,4 @@ template <typename T, typename AList>
 Field(std::string_view, T, AList) -> Field<T, AList>;
 template <typename T>
 Field(std::string_view, T) -> Field<T, AttrList<>>;
+}  // namespace My::MySRefl

@@ -2,10 +2,11 @@
 // Created by Admin on 11/03/2025.
 //
 
+#include <MySRefl_99.h>
 #include <iostream>
-#include "MySRefl_99.h"
 
 using namespace std;
+using namespace My::MySRefl;
 
 // ==============
 //  basic
