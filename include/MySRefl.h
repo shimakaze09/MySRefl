@@ -299,7 +299,7 @@ struct TypeInfoBase {
     else if constexpr (std::is_same_v<DecayDerived, Derived>)
       return static_cast<type&&>(derived);
     else
-      static_assert(true);  // volitile
+      static_assert(true);  // volatile
   }
 
   static constexpr auto VirtualBases() {

@@ -2,7 +2,8 @@
 // Created by Admin on 11/03/2025.
 //
 
-#pragma once  // Ubpa Static Reflection 99 (now 96)
+#pragma once  // My Static Reflection 99 (now 96)
+
 #include <string_view>
 #include <tuple>
 

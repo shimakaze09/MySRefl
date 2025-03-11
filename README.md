@@ -7,7 +7,7 @@
 ## Feature
 
 - **header-only**, **tiny (99 lines)** and **powerful
-  ** ([MySRefl_99.h](https://github.com/shimakaze09/MySRefl/blob/main/include/MySRefl_99.h))
+  ** ([MySRefl_99.h](include/MySRefl_99.h))
 - **noninvasive**
 - basic
     - (non-static / static) member variable
@@ -93,12 +93,16 @@ int main() {
 - [virtual inheritance](src/test/07_virtual/main.cpp)
 - 99 line: [MySRefl_99.h](include/MySRefl_99.h)，[test](src/test/06_99/main.cpp)
 
+## Documentation
+
+- [Introduction](doc/intro.md)
+
 ## Integration
 
-You should add required file [MySRefl.h](include/MySRefl.h) or [USRefl_99.h](include/MySRefl_99.h)
+You should add required file [MySRefl.h](include/MySRefl.h) or [MySRefl_99.h](include/MySRefl_99.h)
 
 ## Compiler compatibility
 
 - Clang/LLVM >= 6
 - GCC >= 7.3
-- MSVC++ >= 19.20 / VS 2019 +
+- MSVC++ >= 19.20 / VS 2019 + (not fully support virtual inheritance because of a MSVC++ bug)
