@@ -2,13 +2,12 @@
 // Created by Admin on 11/03/2025.
 //
 
-#pragma once  // My Static Reflection 99 (now 96)
-
+#pragma once  // Ubpa Static Reflection 99 (now 96)
 #include <string_view>
 #include <tuple>
 
 template <typename L, typename F>
-constexpr size_t detail_FindIf(L list, F&& func, std::index_sequence<>) {
+constexpr size_t detail_FindIf(L, F&&, std::index_sequence<>) {
   return -1;
 }
 
@@ -203,9 +202,9 @@ struct TypeInfoBase {
           derived);  // std::is_same_v<const std::decay_t<U>&, U>
   }
 
-  static constexpr auto GetVirtualBases() {
+  static constexpr auto VirtualBases() {
     return bases.Accumulate(ElemList<>{}, [](auto acc, auto base) {
-      auto concated = base.info.GetVirtualBases().Accumulate(
+      auto concated = base.info.VirtualBases().Accumulate(
           acc, [](auto acc, auto b) { return acc.UniqueInsert(b); });
       if constexpr (!base.is_virtual)
         return concated;
@@ -218,7 +217,7 @@ struct TypeInfoBase {
   static constexpr void DFS(F&& f) {
     f(TypeInfo<type>{}, Depth);
     if constexpr (Depth == 0)
-      GetVirtualBases().ForEach([&](auto vb) { std::forward<F>(f)(vb, 1); });
+      VirtualBases().ForEach([&](auto vb) { std::forward<F>(f)(vb, 1); });
     bases.ForEach([&](auto b) {
       if constexpr (!b.is_virtual)
         b.info.template DFS<F, Depth + 1>(std::forward<F>(f));
@@ -227,7 +226,7 @@ struct TypeInfoBase {
 
   template <typename U, typename Func>
   static constexpr void ForEachVarOf(U&& obj, Func&& func) {
-    GetVirtualBases().ForEach([&](auto vb) {
+    VirtualBases().ForEach([&](auto vb) {
       vb.fields.ForEach([&](auto fld) {
         if constexpr (!fld.is_static && !fld.is_func)
           std::forward<Func>(func)(std::forward<U>(obj).*(fld.value));

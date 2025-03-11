@@ -64,6 +64,10 @@ struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 };
 
 int main() {
+  cout << "[Virtual Bases]" << endl;
+  constexpr auto vbs = TypeInfo<D>::VirtualBases();
+  vbs.ForEach([](auto info) { cout << info.name << endl; });
+
   cout << "[Tree]" << endl;
   TypeInfo<D>::DFS([](auto t, size_t depth) {
     for (size_t i = 0; i < depth; i++)
