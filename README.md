@@ -92,7 +92,7 @@ int main() {
 
 ## Integration
 
-You should add required file [USRefl.h](include/MySRefl.h) or [USRefl_99.h](include/MySRefl_99.h)
+You should add required file [MySRefl.h](include/MySRefl.h) or [USRefl_99.h](include/MySRefl_99.h)
 
 ## Compiler compatibility
 

@@ -2,7 +2,7 @@
 // Created by Admin on 11/03/2025.
 //
 
-#pragma once
+#pragma once  // My Static Reflection 99
 
 #include <string_view>
 #include <tuple>
@@ -100,6 +100,10 @@ struct BaseList {
   constexpr auto Get() const {
     return std::get<N>(list);
   }
+
+#define MySRefl_BaseList_GetByName(list, name) list.Get<list.Find(name)>()
+#define MySRefl_BaseList_GetByValue(list, value) \
+  list.Get<list.FindByValue(value)>()
 };
 }  // namespace detail
 
@@ -120,11 +124,8 @@ Attr(std::string_view) -> Attr<void>;
 
 template <typename... Attrs>
 struct AttrList : detail::BaseList<Attrs...> {
-  using detail::BaseList<Attrs...>::BaseList;
+  constexpr AttrList(Attrs... attrs) : detail::BaseList<Attrs...>{attrs...} {}
 };
-
-template <typename... Attrs>
-AttrList(Attrs...) -> AttrList<Attrs...>;
 
 template <bool s, bool f>
 struct FTraitsB {
@@ -156,21 +157,17 @@ Field(std::string_view, T) -> Field<T, AttrList<>>;
 
 template <typename... Fields>
 struct FieldList : detail::BaseList<Fields...> {
-  using detail::BaseList<Fields...>::BaseList;
+  constexpr FieldList(Fields... fields)
+      : detail::BaseList<Fields...>{fields...} {};
 };
-
-template <typename... Fields>
-FieldList(Fields...) -> FieldList<Fields...>;
 template <typename T>
 struct TypeInfo;  // TypeInfoBase, name, fields, attrs
 
-template <typename... Ts>
-struct TypeInfoList : detail::BaseList<Ts...> {
-  using detail::BaseList<Ts...>::BaseList;
+template <typename... TypeInfos>
+struct TypeInfoList : detail::BaseList<TypeInfos...> {
+  constexpr TypeInfoList(TypeInfos... typeInfos)
+      : detail::BaseList<TypeInfos...>{typeInfos...} {};
 };
-
-template <typename... Ts>
-TypeInfoList(Ts...) -> TypeInfoList<Ts...>;
 
 template <typename T, typename... Bases>
 struct TypeInfoBase {
