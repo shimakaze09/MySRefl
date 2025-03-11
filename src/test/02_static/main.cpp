@@ -38,7 +38,7 @@ int main() {
     cout << field.name << endl;
     field.attrs.ForEach([](auto attr) {
       cout << "name   : " << attr.name << endl;
-      if constexpr (!attr.has_value)
+      if constexpr (attr.has_value)
         cout << "value : " << attr.value << endl;
     });
   });
@@ -59,6 +59,6 @@ int main() {
 
   Type<Point>::fields.ForEach([](auto field) {
     if constexpr (field.is_static)
-      cout << field.name << ": " << *field.ptr << endl;
+      cout << field.name << ": " << *field.value << endl;
   });
 }

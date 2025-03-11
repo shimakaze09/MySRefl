@@ -50,10 +50,9 @@ static constexpr size_t FindIf(const List& list, const Func& func,
 }
 
 template <typename T>
-struct NamedValue {
+struct NamedValueBase {
   std::string_view name;
-  T value;
-  static constexpr bool has_value{true};
+  static constexpr bool has_value = !std::is_void_v<T>;
 
   template <typename U>
   static constexpr bool ValueTypeIs() {
@@ -66,10 +65,17 @@ struct NamedValue {
   }
 };
 
+template <typename T>
+struct NamedValue : NamedValueBase<T> {
+  constexpr NamedValue(std::string_view name, T value)
+      : NamedValueBase<T>{name}, value{value} {}
+
+  T value;
+};
+
 template <>
-struct NamedValue<void> {
-  std::string_view name;
-  static constexpr bool has_value{false};
+struct NamedValue<void> : NamedValueBase<void> {
+  constexpr NamedValue(std::string_view name) : NamedValueBase<void>{name} {}
 };
 
 // Elems has name
@@ -101,7 +107,6 @@ struct BaseList : std::tuple<Elems...> {
           return elem.value == value;
         else
           return false;
-        //return true;
       } else
         return false;
     });
@@ -122,10 +127,7 @@ struct BaseList : std::tuple<Elems...> {
 namespace My::MySRefl {
 // field : member variable/function, static or non-static
 
-// name, fields, attrs
-template <typename T>
-struct Type;
-
+// Ret(Args...)[const]
 template <typename Func>
 struct IsFunc : std::false_type {};
 
@@ -198,9 +200,9 @@ struct Attr<void> : detail::NamedValue<void> {
   constexpr Attr(std::string_view name) : detail::NamedValue<void>{name} {}
 };
 
-using AttrStr = Attr<std::string_view>;
 template <size_t N>
 Attr(std::string_view, const char[N]) -> Attr<std::string_view>;
+Attr(std::string_view) -> Attr<void>;
 
 template <typename T>
 struct IsAttr : std::false_type {};
@@ -213,8 +215,6 @@ struct AttrList : detail::BaseList<Attrs...> {
   static_assert((IsAttr<Attrs>::value && ...));
   using detail::BaseList<Attrs...>::BaseList;
 };
-template <class... Attrs>
-AttrList(Attrs...) -> AttrList<Attrs...>;
 
 template <typename T>
 struct IsAttrList : std::false_type {};
@@ -248,8 +248,22 @@ struct FieldList : detail::BaseList<Fields...> {
   static_assert((IsField<Fields>::value && ...));
   using detail::BaseList<Fields...>::BaseList;
 };
-template <class... Fields>
-FieldList(Fields...) -> FieldList<Fields...>;
+
+// name, type, fields, attrs, subclasses
+template <typename T>
+struct Type;
+
+template <typename T>
+struct IsType : std::false_type {};
+
+template <typename T>
+struct IsType<Type<T>> : std::true_type {};
+
+template <typename... Types>
+struct TypeList : detail::BaseList<Types...> {
+  using detail::BaseList<Types...>::BaseList;
+  static_assert((IsType<Types>::value && ...));
+};
 
 // non-static member variables
 template <typename T, typename Func>
