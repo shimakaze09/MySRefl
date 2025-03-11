@@ -106,6 +106,7 @@ int main() {
 - [enum](src/test/04_enum/main.cpp)
 - [inheritance](src/test/05_inheritance/main.cpp)
 - [virtual inheritance](src/test/07_virtual/main.cpp)
+- [API: accumulate + mask](src/test/08_mask/main.cpp)
 - 99 line: [MySRefl_99.h](include/MySRefl_99.h)，[test](src/test/06_99/main.cpp)
 
 ## Documentation
