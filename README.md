@@ -18,8 +18,6 @@
     - enum
         - enumerator
 - template
-    - basic
-    - attribute
 - inheritance
     - inherit field (member variable, member function)
     - iterate subclasses recursively

@@ -94,7 +94,7 @@ struct BaseList {
   constexpr size_t FindByValue(T value) const {
     return FindIf([value](auto elem) {
       if constexpr (elem.has_value) {
-        if constexpr (std::is_same_v<decltype(elem.value), decltype(value)>)
+        if constexpr (std::is_same_v<decltype(elem.value), T>)
           return elem.value == value;
         else
           return false;
@@ -190,7 +190,7 @@ FieldList(Fields...) -> FieldList<Fields...>;
 template <typename... Fields>
 FieldList(std::tuple<Fields...>) -> FieldList<Fields...>;
 template <typename T>
-struct Type;  // name, type, subclasses, fields, attrs
+struct Type;  // name, type, bases, fields, attrs
 
 template <typename... Ts>
 struct TypeList : detail::BaseList<TypeList, Ts...> {

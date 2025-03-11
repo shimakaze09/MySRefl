@@ -262,7 +262,7 @@ FieldList(Fields...) -> FieldList<Fields...>;
 template <typename... Fields>
 FieldList(std::tuple<Fields...>) -> FieldList<Fields...>;
 
-// name, type, subclasses, fields, attrs,
+// name, type, bases, fields, attrs,
 template <typename T>
 struct Type;
 
