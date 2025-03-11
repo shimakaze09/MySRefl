@@ -86,6 +86,7 @@ struct NamedValue<void> {
 template <typename... Es>
 struct ElemList {  // Es is a named value
   std::tuple<Es...> elems;
+  static constexpr size_t size = sizeof...(Es);
 
   constexpr ElemList(Es... elems) : elems{elems...} {}
 
@@ -93,7 +94,7 @@ struct ElemList {  // Es is a named value
   constexpr auto Accumulate(Init&& init, Func&& func) const {
     return detail::Acc<ms...>(*this, std::forward<Func>(func),
                               std::forward<Init>(init),
-                              std::make_index_sequence<sizeof...(Es)>{});
+                              std::make_index_sequence<size>{});
   }
 
   template <bool... ms, typename Func>
