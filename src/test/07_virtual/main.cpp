@@ -2,7 +2,7 @@
 // Created by Admin on 11/03/2025.
 //
 
-#include <MySRefl.h>
+#include <MySRefl/MySRefl.h>
 
 #include <iostream>
 
@@ -29,8 +29,6 @@ struct D : B, C {
 
 template <>
 struct TypeInfo<A> : TypeInfoBase<A> {
-  static constexpr std::string_view name = "A";
-
   static constexpr FieldList fields = FieldList{Field{"a", &A::a}};
 
   static constexpr AttrList attrs = {};
@@ -38,8 +36,6 @@ struct TypeInfo<A> : TypeInfoBase<A> {
 
 template <>
 struct TypeInfo<B> : TypeInfoBase<B, Base<A, true>> {
-  static constexpr std::string_view name = "B";
-
   static constexpr FieldList fields = FieldList{Field{"b", &B::b}};
 
   static constexpr AttrList attrs = {};
@@ -47,23 +43,26 @@ struct TypeInfo<B> : TypeInfoBase<B, Base<A, true>> {
 
 template <>
 struct TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
-  static constexpr std::string_view name = "C";
-
   static constexpr FieldList fields = FieldList{Field{"c", &C::c}};
 
   static constexpr AttrList attrs = {};
 };
 
 template <>
-struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-  static constexpr std::string_view name = "D";
-
+struct Ubpa::USRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
   static constexpr FieldList fields = FieldList{Field{"d", &D::d}};
 
   static constexpr AttrList attrs = {};
 };
 
 int main() {
+  cout << "// not fully support in MSVC++ 19.26 because of a bug (2020/07/17)"
+       << endl;
+  cout << "// "
+          "https://developercommunity.visualstudio.com/content/problem/1116835/"
+          "member-pointer-of-a-class-with-a-virtual-base-1.html"
+       << endl;
+
   cout << "[Virtual Bases]" << endl;
   constexpr auto vbs = TypeInfo<D>::VirtualBases();
   vbs.ForEach([](auto info) { cout << info.name << endl; });

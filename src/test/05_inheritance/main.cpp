@@ -2,7 +2,7 @@
 // Created by Admin on 11/03/2025.
 //
 
-#include <MySRefl.h>
+#include <MySRefl/MySRefl.h>
 
 #include <iostream>
 
@@ -29,8 +29,6 @@ struct D : B, C {
 
 template <>
 struct TypeInfo<A> : TypeInfoBase<A> {
-  static constexpr std::string_view name = "A";
-
   static constexpr FieldList fields = FieldList{Field{"a", &A::a}};
 
   static constexpr AttrList attrs = {};
@@ -38,8 +36,6 @@ struct TypeInfo<A> : TypeInfoBase<A> {
 
 template <>
 struct TypeInfo<B> : TypeInfoBase<B, Base<A>> {
-  static constexpr std::string_view name = "B";
-
   static constexpr FieldList fields = FieldList{Field{"b", &B::b}};
 
   static constexpr AttrList attrs = {};
@@ -47,8 +43,6 @@ struct TypeInfo<B> : TypeInfoBase<B, Base<A>> {
 
 template <>
 struct TypeInfo<C> : TypeInfoBase<C, Base<A>> {
-  static constexpr std::string_view name = "C";
-
   static constexpr FieldList fields = FieldList{Field{"c", &C::c}};
 
   static constexpr AttrList attrs = {};
@@ -56,8 +50,6 @@ struct TypeInfo<C> : TypeInfoBase<C, Base<A>> {
 
 template <>
 struct TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-  static constexpr std::string_view name = "D";
-
   static constexpr FieldList fields = FieldList{Field{"d", &D::d}};
 
   static constexpr AttrList attrs = {};
@@ -85,12 +77,13 @@ int main() {
   d.b = 3;
   d.c = 4;
   d.d = 5;
-  auto tt = TypeInfo<D>::fields;
+  cout << "[left]" << endl;
   TypeInfo<D>::ForEachVarOf(std::move(d), [cnt = 0](auto&& var) mutable {
     static_assert(std::is_rvalue_reference_v<decltype(var)>);
     cout << cnt << ": " << var << endl;
     cnt++;
   });
+  cout << "[right]" << endl;
   TypeInfo<D>::ForEachVarOf(d, [cnt = 0](auto&& var) mutable {
     static_assert(std::is_lvalue_reference_v<decltype(var)>);
     cout << cnt << ": " << var << endl;

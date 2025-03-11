@@ -112,7 +112,13 @@ int main() {
 
 ## Integration
 
-You should add required file [MySRefl.h](include/MySRefl.h) or [MySRefl_99.h](include/MySRefl_99.h)
+- You can choose one of the following three methods
+
+- **method 0**: add required file [MySRefl_99.h](include/MySRefl_99.h)
+- run CMake (download [nameof.hpp](https://github.com/Neargye/nameof/blob/master/include/nameof.hpp)
+  to [include/MySRefl/_deps/](include/MySRefl/_deps/))
+    - **method 1**: directly use [include/MySRefl/](include/MySRefl/)
+    - **method 2**: cmake install, `find package(MySRefl REQUIRED)` to get imported target `My::MySRefl_core`
 
 ## Compiler compatibility
 

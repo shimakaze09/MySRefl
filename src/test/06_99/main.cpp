@@ -277,7 +277,8 @@ void test_function() {
   constexpr auto f0 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func0");
   cout << f0.name << endl;
-  constexpr auto f0_args = MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
+  constexpr auto f0_args =
+      MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
   f0_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -288,7 +289,8 @@ void test_function() {
   constexpr auto f1 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func1");
   cout << f1.name << endl;
-  constexpr auto f1_args = MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
+  constexpr auto f1_args =
+      MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
   f1_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -357,7 +359,7 @@ void test_virtual() {
        << " virtual" << endl
        << "====================" << endl;
 
-  cout << "// not full support in MSVC++ 19.26 because of a bug (2020/07/17)"
+  cout << "// not fully support in MSVC++ 19.26 because of a bug (2020/07/17)"
        << endl;
   cout << "// "
           "https://developercommunity.visualstudio.com/content/problem/1116835/"

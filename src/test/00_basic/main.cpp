@@ -2,7 +2,7 @@
 // Created by Admin on 11/03/2025.
 //
 
-#include <MySRefl.h>
+#include <MySRefl/MySRefl.h>
 
 #include <iostream>
 
@@ -18,8 +18,6 @@ struct [[size(8)]] Point {
 
 template <>
 struct TypeInfo<Point> : TypeInfoBase<Point> {
-  static constexpr std::string_view name = "Point";
-
   static constexpr FieldList fields = {
       Field{"x", &Point::x, AttrList{Attr{"not_serialize"}}},
       Field{"y", &Point::y, AttrList{Attr{"info", "hello"}}}};
@@ -28,7 +26,7 @@ struct TypeInfo<Point> : TypeInfoBase<Point> {
 };
 
 int main() {
-  Point p{1, 2};
+  cout << TypeInfo<Point>::name << endl;
 
   TypeInfo<Point>::fields.ForEach([](auto field) {
     cout << field.name << endl;
@@ -52,5 +50,6 @@ int main() {
       cout << "value : " << attr.value << endl;
   });
 
-  TypeInfo<Point>::ForEachVarOf(p, [](auto&& var) { cout << var << endl; });
+  TypeInfo<Point>::ForEachVarOf(Point{1, 2},
+                                [](auto&& var) { cout << var << endl; });
 }
