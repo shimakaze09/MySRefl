@@ -8,6 +8,7 @@
 
 - the **best** C++ static reflection library in the whole world
 - tiny, handy, elegant
+- noninvasive
 - basic
     - (non-static / static) member variable
     - (non-static / static) member function
@@ -85,4 +86,8 @@ int main() {
 - [func](src/test/03_func/main.cpp)
 - [enum](src/test/04_enum/main.cpp)
 - [inheritance](src/test/05_subclass/main.cpp)
-- 99 line: [MySRefl_99.h](src/test/06_99/MySRefl_99.h)，test [MySRefl_99.h](src/test/06_99/main.cpp) 
+- 99 line: [MySRefl_99.h](src/test/06_99/MySRefl_99.h)，test [MySRefl_99.h](src/test/06_99/main.cpp)
+
+## Integration
+
+You should add required file [MySRefl.h](include/MySRefl.h)
