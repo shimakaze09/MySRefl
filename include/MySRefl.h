@@ -215,6 +215,8 @@ struct AttrList : detail::BaseList<Attrs...> {
   static_assert((IsAttr<Attrs>::value && ...));
   using detail::BaseList<Attrs...>::BaseList;
 };
+template <class... Attrs>
+AttrList(Attrs...) -> AttrList<Attrs...>;
 
 template <typename T>
 struct IsAttrList : std::false_type {};
@@ -248,6 +250,8 @@ struct FieldList : detail::BaseList<Fields...> {
   static_assert((IsField<Fields>::value && ...));
   using detail::BaseList<Fields...>::BaseList;
 };
+template <class... Fields>
+FieldList(Fields...) -> FieldList<Fields...>;
 
 // name, type, fields, attrs, subclasses
 template <typename T>
@@ -264,6 +268,8 @@ struct TypeList : detail::BaseList<Types...> {
   using detail::BaseList<Types...>::BaseList;
   static_assert((IsType<Types>::value && ...));
 };
+template <class... Types>
+TypeList(Types...) -> TypeList<Types...>;
 
 // non-static member variables
 template <typename T, typename Func>
