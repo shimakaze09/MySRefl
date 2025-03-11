@@ -44,14 +44,27 @@ constexpr auto Acc(L l, F&& f, R&& r, std::index_sequence<N0, Ns...>) {
 }
 
 template <typename TI, typename U, typename F>
-constexpr void NV_Var(TI info, U&& obj, F&& f) {
-  info.fields.ForEach([&](auto fld) {
-    if constexpr (!fld.is_static && !fld.is_func)
-      std::forward<F>(f)(std::forward<U>(obj).*(fld.value));
+constexpr void NV_Var(TI info, U&& u, F&& f) {
+  info.fields.ForEach([&](auto k) {
+    if constexpr (!k.is_static && !k.is_func)
+      std::forward<F>(f)(std::forward<U>(u).*(k.value));
   });
   info.bases.ForEach([&](auto b) {
     if constexpr (!b.is_virtual)
-      NV_Var(b.info, b.info.Forward(std::forward<U>(obj)), std::forward<F>(f));
+      NV_Var(b.info, b.info.Forward(std::forward<U>(u)), std::forward<F>(f));
+  });
+}
+
+template <size_t D, typename T, typename Acc, typename F>
+constexpr auto DFS_Acc(T t, F&& f, Acc&& acc) {
+  return t.bases.Accumulate(std::forward<Acc>(acc), [&](auto&& r, auto b) {
+    if constexpr (b.is_virtual)
+      return DFS_Acc<D + 1>(b.info, std::forward<F>(f),
+                            std::forward<decltype(r)>(r));
+    else
+      return DFS_Acc<D + 1>(
+          b.info, std::forward<F>(f),
+          std::forward<F>(f)(std::forward<decltype(r)>(r), b.info, D + 1));
   });
 }
 }  // namespace My::MySRefl::detail
@@ -235,14 +248,23 @@ struct TypeInfoBase {
     });
   }
 
-  template <typename F, size_t Depth = 0>
-  static constexpr void DFS(F&& f) {
-    f(TypeInfo<type>{}, Depth);
-    if constexpr (Depth == 0)
-      VirtualBases().ForEach([&](auto vb) { std::forward<F>(f)(vb, 1); });
-    bases.ForEach([&](auto b) {
-      if constexpr (!b.is_virtual)
-        b.info.template DFS<F, Depth + 1>(std::forward<F>(f));
+  template <typename R, typename F>
+  static constexpr auto DFS_Acc(R&& r, F&& f) {
+    return detail::DFS_Acc<0>(
+        TypeInfo<type>{}, std::forward<F>(f),
+        VirtualBases().Accumulate(f(std::forward<R>(r), TypeInfo<type>{}, 0),
+                                  [&](auto&& acc, auto vb) {
+                                    return std::forward<F>(f)(
+                                        std::forward<decltype(acc)>(acc), vb,
+                                        1);
+                                  }));
+  }
+
+  template <typename F>
+  static constexpr void DFS_ForEach(F&& f) {
+    DFS_Acc(0, [&](auto, auto t, auto d) {
+      std::forward<F>(f)(t, d);
+      return 0;
     });
   }
 

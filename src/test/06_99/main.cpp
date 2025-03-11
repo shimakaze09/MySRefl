@@ -167,7 +167,7 @@ void test_inheritance() {
        << " inheritance" << endl
        << "====================" << endl;
 
-  TypeInfo<D>::DFS([](auto t, size_t depth) {
+  TypeInfo<D>::DFS_ForEach([](auto t, size_t depth) {
     for (size_t i = 0; i < depth; i++)
       cout << "  ";
     cout << t.name << endl;
@@ -177,7 +177,7 @@ void test_inheritance() {
   TypeInfo<D>::fields.ForEach([](auto field) { cout << field.name << endl; });
 
   cout << "[DFS]" << endl;
-  TypeInfo<D>::DFS([](auto t, size_t) {
+  TypeInfo<D>::DFS_ForEach([](auto t, size_t) {
     t.fields.ForEach([](auto field) { cout << field.name << endl; });
   });
 
@@ -279,7 +279,8 @@ void test_function() {
   constexpr auto f0 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func0");
   cout << f0.name << endl;
-  constexpr auto f0_args = MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
+  constexpr auto f0_args =
+      MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
   f0_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -290,7 +291,8 @@ void test_function() {
   constexpr auto f1 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func1");
   cout << f1.name << endl;
-  constexpr auto f1_args = MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
+  constexpr auto f1_args =
+      MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
   f1_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -371,14 +373,14 @@ void test_virtual() {
   vbs.ForEach([](auto info) { cout << info.name << endl; });
 
   cout << "[Tree]" << endl;
-  TypeInfo<VD>::DFS([](auto t, size_t depth) {
+  TypeInfo<VD>::DFS_ForEach([](auto t, size_t depth) {
     for (size_t i = 0; i < depth; i++)
       cout << "  ";
     cout << t.name << endl;
   });
 
   cout << "[field]" << endl;
-  TypeInfo<VD>::DFS([](auto t, size_t) {
+  TypeInfo<VD>::DFS_ForEach([](auto t, size_t) {
     t.fields.ForEach([](auto field) { cout << field.name << endl; });
   });
 
