@@ -3,6 +3,7 @@
 //
 
 #pragma once  // My Static Reflection 99 (now 72)
+
 #include <string_view>
 #include <tuple>
 
@@ -19,6 +20,32 @@ constexpr size_t detail_FindIf(const List& list, Func&& func,
              ? N0
              : detail_FindIf(list, std::forward<Func>(func),
                              std::index_sequence<Ns...>{});
+}
+
+template <typename List, typename F, typename R>
+constexpr auto detail_Acc(const List&, F&&, R&& r, std::index_sequence<>) {
+  return r;
+}
+
+template <typename List, typename F, typename R, size_t N0, size_t... Ns>
+constexpr auto detail_Acc(const List& l, F&& f, R&& r,
+                          std::index_sequence<N0, Ns...>) {
+  return detail_Acc(l, std::forward<F>(f),
+                    f(std::forward<R>(r), l.template Get<N0>()),
+                    std::index_sequence<Ns...>{});
+}
+
+template <typename TI, typename U, typename Func>
+constexpr void detail_NV_Var(TI info, U&& obj, Func&& func) {
+  info.fields.ForEach([&](auto field) {
+    if constexpr (!field.is_static && !field.is_func)
+      std::forward<Func>(func)(std::forward<U>(obj).*(field.value));
+  });
+  info.bases.ForEach([&](auto b) {
+    if constexpr (!b.is_virtual)
+      detail_NV_Var(b.info, b.info.Forward(std::forward<U>(obj)),
+                    std::forward<Func>(func));
+  });
 }
 
 template <typename T>
@@ -59,6 +86,12 @@ struct ElemList {  // Elems is a named value
                elems);
   }
 
+  template <typename Func, typename Init>
+  constexpr auto Accumulate(Init&& init, Func&& func) const {
+    return detail_Acc(*this, std::forward<Func>(func), std::forward<Init>(init),
+                      std::make_index_sequence<sizeof...(Elems)>{});
+  }
+
   template <typename Func>
   constexpr size_t FindIf(Func&& func) const {
     return detail_FindIf(*this, std::forward<Func>(func),
@@ -76,6 +109,16 @@ struct ElemList {  // Elems is a named value
 
   constexpr bool Contains(std::string_view name) const {
     return Find(name) != static_cast<size_t>(-1);
+  }
+
+  template <typename Elem>
+  constexpr auto UniqueInsert(Elem e) const {
+    if constexpr ((std::is_same_v<Elems, Elem> || ...))
+      return *this;
+    else
+      return std::apply(
+          [e](auto... es) { return ElemList<Elems..., Elem>{es..., e}; },
+          elems);
   }
 
   template <size_t N>
@@ -132,6 +175,17 @@ struct FieldList : ElemList<Fs...> {
 template <typename T>
 struct TypeInfo;  // TypeInfoBase, name, fields, attrs
 
+template <typename T, bool IsVirtual = false>
+struct Base {
+  static constexpr auto info = TypeInfo<T>{};
+  static constexpr bool is_virtual = IsVirtual;
+};
+
+template <typename... Bs>
+struct BaseList : ElemList<Bs...> {
+  constexpr BaseList(Bs... bs) : ElemList<Bs...>{bs...} {}
+};
+
 template <typename... Ts>
 struct TypeInfoList : ElemList<Ts...> {
   constexpr TypeInfoList(Ts... ts) : ElemList<Ts...>{ts...} {}
@@ -140,36 +194,51 @@ struct TypeInfoList : ElemList<Ts...> {
 template <typename T, typename... Bases>
 struct TypeInfoBase {
   using type = T;
-  static constexpr TypeInfoList bases = {TypeInfo<Bases>{}...};
+  static constexpr BaseList bases = {Bases{}...};
 
   template <typename U>
   static constexpr auto&& Forward(U&& derived) noexcept {
-    if constexpr (std::is_same_v<const std::decay_t<U>&, U>)
-      return static_cast<const type&>(derived);
+    if constexpr (std::is_same_v<std::decay_t<U>, U>)
+      return static_cast<type&&>(derived);  // right
     else if constexpr (std::is_same_v<std::decay_t<U>&, U>)
-      return static_cast<type&>(derived);
+      return static_cast<type&>(derived);  // left
     else
-      return static_cast<type&&>(
-          derived);  // if constexpr (std::is_same_v<DecayU, U>)
+      return static_cast<const std::decay_t<U>&>(
+          derived);  // std::is_same_v<const std::decay_t<U>&, U>
   }
 
-  template <typename Func>
-  static constexpr void DFS(Func&& func, size_t depth = 0) {
-    func(TypeInfo<type>{}, depth);
-    TypeInfo<type>::bases.ForEach(
-        [&](auto base) { base.DFS(std::forward<Func>(func), depth + 1); });
+  static constexpr auto GetVirtualBases() {
+    return bases.Accumulate(ElemList<>{}, [](auto acc, auto base) {
+      auto concated = base.info.GetVirtualBases().Accumulate(
+          acc, [](auto acc, auto b) { return acc.UniqueInsert(b); });
+      if constexpr (!base.is_virtual)
+        return concated;
+      else
+        return concated.UniqueInsert(base.info);
+    });
+  }
+
+  template <typename F, size_t Depth = 0>
+  static constexpr void DFS(F&& f) {
+    f(TypeInfo<type>{}, Depth);
+    if constexpr (Depth == 0)
+      GetVirtualBases().ForEach([&](auto vb) { std::forward<F>(f)(vb, 1); });
+    bases.ForEach([&](auto b) {
+      if constexpr (!b.is_virtual)
+        b.info.template DFS<F, Depth + 1>(std::forward<F>(f));
+    });
   }
 
   template <typename U, typename Func>
   static constexpr void ForEachVarOf(U&& obj, Func&& func) {
-    TypeInfo<type>::fields.ForEach([&](auto f) {
-      if constexpr (!f.is_static && !f.is_func)
-        std::forward<Func>(func)(std::forward<U>(obj).*(f.value));
+    GetVirtualBases().ForEach([&](auto vb) {
+      vb.fields.ForEach([&](auto fld) {
+        if constexpr (!fld.is_static && !fld.is_func)
+          std::forward<Func>(func)(std::forward<U>(obj).*(fld.value));
+      });
     });
-    TypeInfo<type>::bases.ForEach([&](auto base) {
-      base.ForEachVarOf(base.Forward(std::forward<U>(obj)),
-                        std::forward<Func>(func));
-    });
+    detail_NV_Var(TypeInfo<type>{}, std::forward<U>(obj),
+                  std::forward<Func>(func));
   }
 };
 
