@@ -14,19 +14,6 @@ struct IsInstance : std::false_type {};
 template <template <typename...> class U, typename... Ts>
 struct IsInstance<U<Ts...>, U> : std::true_type {};
 
-template <size_t idx, typename T, typename Func>
-constexpr void ForNonStaticFieldOf(T&& obj, const Func& func) {
-  const auto& field = Type<std::decay_t<T>>::fields.Get<idx>();
-  if constexpr (!field.is_static)
-    func(obj.*(field.value));
-}
-
-template <typename T, typename Func, size_t... Ns>
-constexpr void ForEachVarOf(T&& obj, const Func& func,
-                            std::index_sequence<Ns...>) {
-  (ForNonStaticFieldOf<Ns>(obj, func), ...);
-}
-
 template <typename List, typename Func, size_t... Ns>
 constexpr void ForEach(const List& list, const Func& func,
                        std::index_sequence<Ns...>) {
@@ -39,34 +26,29 @@ struct IndexSequenceTraits;
 template <size_t N0, size_t... Ns>
 struct IndexSequenceTraits<std::index_sequence<N0, Ns...>> {
   static constexpr size_t head = N0;
-  using tail = std::index_sequence<Ns...>;
+  static constexpr auto tail = std::index_sequence<Ns...>{};
 };
 
 template <typename List, typename Func, size_t... Ns>
 constexpr size_t FindIf(const List& list, const Func& func,
                         std::index_sequence<Ns...>) {
-  if constexpr (sizeof...(Ns) == 0)
+  if constexpr (sizeof...(Ns) > 0) {
+    using IST = IndexSequenceTraits<std::index_sequence<Ns...>>;
+    return func(std::get<IST::head>(list)) ? IST::head
+                                           : FindIf(list, func, IST::tail);
+  } else
     return static_cast<size_t>(-1);
-  else {
-    constexpr size_t head =
-        IndexSequenceTraits<std::index_sequence<Ns...>>::head;
-    using tail = typename IndexSequenceTraits<std::index_sequence<Ns...>>::tail;
-    return func(std::get<head>(list)) ? head : FindIf(list, func, tail{});
-  }
 }
 
 template <typename FList, typename TList, size_t... Ns>
 constexpr auto FieldListUnionTypeList(FList flist, TList tlist,
                                       std::index_sequence<Ns...>) {
-  if constexpr (sizeof...(Ns) == 0)
+  if constexpr (sizeof...(Ns) > 0) {
+    using IST = IndexSequenceTraits<std::index_sequence<Ns...>>;
+    return FieldListUnionTypeList(flist.Union(tlist.Get<IST::head>().fields),
+                                  tlist, IST::tail);
+  } else
     return flist;
-  else {
-    constexpr size_t head =
-        IndexSequenceTraits<std::index_sequence<Ns...>>::head;
-    using tail = typename IndexSequenceTraits<std::index_sequence<Ns...>>::tail;
-    return FieldListUnionTypeList(flist.Union(tlist.Get<head>().fields), tlist,
-                                  tail{});
-  }
 }
 
 template <typename T>
@@ -298,8 +280,9 @@ TypeList(std::tuple<Types...>) -> TypeList<Types...>;
 // non-static member variables
 template <typename T, typename Func>
 constexpr void ForEachVarOf(T&& obj, const Func& func) {
-  detail::ForEachVarOf(
-      std::forward<T>(obj), func,
-      std::make_index_sequence<Type<std::decay_t<T>>::fields.size>{});
+  Type<std::decay_t<T>>::fields.ForEach([&](auto field) {
+    if constexpr (!field.is_static && !field.is_function)
+      func(obj.*(field.value));
+  });
 }
 }  // namespace My::MySRefl
