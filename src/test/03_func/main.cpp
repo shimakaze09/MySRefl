@@ -25,7 +25,7 @@ struct [[size(8)]] Point {
 };
 
 template <>
-struct Type<Point> {
+struct TypeInfo<Point> {
   static constexpr std::string_view name = "Point";
   using type = Point;
 
@@ -41,7 +41,7 @@ struct Type<Point> {
 int main() {
   Point p{1, 2};
 
-  Type<Point>::fields.ForEach([p](auto field) {
+  TypeInfo<Point>::fields.ForEach([p](auto field) {
     if constexpr (field.is_function) {
       if (field.name != "Sum")
         return;
