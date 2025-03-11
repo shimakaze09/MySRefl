@@ -27,18 +27,18 @@ template <typename R, typename... Args>
 struct IsFunc<R(Args...) const> : std::true_type {};
 
 template <typename List, typename Func, size_t... Ns>
-constexpr void ForEach(List list, const Func& func,
-                       std::index_sequence<Ns...>) {
+constexpr void ForEach(List list, Func&& func, std::index_sequence<Ns...>) {
   (func(list.template Get<Ns>()), ...);
 }
 
 template <typename List, typename Func, size_t... Ns>
-constexpr size_t FindIf(const List& list, const Func& func,
+constexpr size_t FindIf(const List& list, Func&& func,
                         std::index_sequence<Ns...>) {
   if constexpr (sizeof...(Ns) > 0) {
     using IST = ISTraits<std::index_sequence<Ns...>>;
-    return func(list.template Get<IST::head>()) ? IST::head
-                                                : FindIf(list, func, IST::tail);
+    return func(list.template Get<IST::head>())
+               ? IST::head
+               : FindIf(list, std::forward<Func>(func), IST::tail);
   } else
     return static_cast<size_t>(-1);
 }
@@ -64,13 +64,15 @@ struct BaseList {
   constexpr BaseList(Elems... elems) : list{elems...} {}
 
   template <typename Func>
-  constexpr void ForEach(const Func& func) const {
-    detail::ForEach(*this, func, std::make_index_sequence<size>{});
+  constexpr void ForEach(Func&& func) const {
+    detail::ForEach(*this, std::forward<Func>(func),
+                    std::make_index_sequence<size>{});
   }
 
   template <typename Func>
-  constexpr size_t FindIf(const Func& func) const {
-    return detail::FindIf(*this, func, std::make_index_sequence<size>{});
+  constexpr size_t FindIf(Func&& func) const {
+    return detail::FindIf(*this, std::forward<Func>(func),
+                          std::make_index_sequence<size>{});
   }
 
   constexpr size_t Find(std::string_view n) const {
@@ -187,20 +189,21 @@ struct TypeInfoBase {
   }
 
   template <typename Func>
-  static constexpr void DFS(const Func& func, size_t depth = 0) {
+  static constexpr void DFS(Func&& func, size_t depth = 0) {
     func(TypeInfo<type>{}, depth);
     TypeInfo<type>::bases.ForEach(
-        [&](auto base) { base.DFS(func, depth + 1); });
+        [&](auto base) { base.DFS(std::forward<Func>(func), depth + 1); });
   }
 
   template <typename U, typename Func>
-  static constexpr void ForEachVarOf(U&& obj, const Func& func) {
+  static constexpr void ForEachVarOf(U&& obj, Func&& func) {
     TypeInfo<type>::fields.ForEach([&](auto f) {
       if constexpr (!f.is_static && !f.is_func)
-        func(std::forward<U>(obj).*(f.value));
+        std::forward<Func>(func)(std::forward<U>(obj).*(f.value));
     });
     TypeInfo<type>::bases.ForEach([&](auto base) {
-      base.ForEachVarOf(base.Forward(std::forward<U>(obj)), func);
+      base.ForEachVarOf(base.Forward(std::forward<U>(obj)),
+                        std::forward<Func>(func));
     });
   }
 };

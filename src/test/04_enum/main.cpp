@@ -25,7 +25,6 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 template <>
 struct TypeInfo<Color> : TypeInfoBase<Color> {
   static constexpr std::string_view name = "Color";
-  using type = Color;
 
   static constexpr FieldList fields = {
       Field{"RED", Color::RED,
@@ -40,6 +39,8 @@ struct TypeInfo<Color> : TypeInfoBase<Color> {
 int main() {
   TypeInfo<Color>::fields.ForEach(
       [](auto field) { cout << field.name << endl; });
+  constexpr size_t idx = TypeInfo<Color>::fields.Find("RED");
+  constexpr size_t idx2 = TypeInfo<Color>::fields.FindByValue(Color::RED);
   static_assert(
       TypeInfo<Color>::fields.Get<TypeInfo<Color>::fields.Find("RED")>()
           .value == Color::RED);

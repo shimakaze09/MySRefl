@@ -76,7 +76,7 @@ int main() {
   dump<D>();
 
   TypeInfo<D>::fields.ForEach([](auto field) { cout << field.name << endl; });
-  TypeInfo<D>::DFS([](auto t) {
+  TypeInfo<D>::DFS([](auto t, size_t) {
     t.fields.ForEach([](auto field) { cout << field.name << endl; });
   });
 
