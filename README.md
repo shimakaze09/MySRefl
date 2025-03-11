@@ -6,18 +6,17 @@
 
 ## Feature
 
-- the **best** C++ static reflection library in the whole world
-- tiny, handy, elegant (only 99 lines [USRefl_99.h](include/MySRefl_99.h))
-- noninvasive
+- **header-only**, **tiny (99 lines)** and **powerful** ([MySRefl_99.h](https://github.com/shimakaze09/MySRefl/blob/main/include/MySRefl_99.h))
+- **noninvasive**
 - basic
     - (non-static / static) member variable
     - (non-static / static) member function
-- attribute
-- enum
+- **attribute**
+- **enum**
     - string <-> key
     - static dispatch
-- template
-- inheritance
+- **template**
+- **inheritance**
     - diamond inheritance
     - iterate bases recursively
 
