@@ -38,7 +38,7 @@ Header-only, tiny (99 lines) and powerful C++17 static reflection library.
 ## Example
 
 ```c++
-#include <MySRefl.h>
+#include <MySRefl/MySRefl.h>
 
 #include <iostream>
 
