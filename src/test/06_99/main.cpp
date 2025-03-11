@@ -186,7 +186,12 @@ void dump(size_t depth = 0) {
       [depth](auto t) { dump<typename decltype(t)::type>(depth + 1); });
 }
 
+template <typename T>
+void func(T&&) {}
+
 void test_inheritance() {
+  A a;
+  func(std::move(a));
   cout << "====================" << endl
        << " inheritance" << endl
        << "====================" << endl;
