@@ -51,5 +51,5 @@ int main() {
       cout << "value : " << attr.value << endl;
   });
 
-  TypeInfo<Point>::DFS_ForEachVarOf(p, [](auto&& var) { cout << var << endl; });
+  TypeInfo<Point>::ForEachVarOf(p, [](auto&& var) { cout << var << endl; });
 }

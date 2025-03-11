@@ -77,8 +77,6 @@ struct BaseList {
 
   constexpr BaseList(Elems... elems) : list{elems...} {}
 
-  constexpr BaseList(std::tuple<Elems...> elems) : list{elems} {}
-
   template <typename Func>
   constexpr void ForEach(const Func& func) const {
     detail::ForEach(*this, func, std::make_index_sequence<size>{});
@@ -163,7 +161,7 @@ struct FieldTraits<T Object::*> {
   using object_type = Object;
   using value_type = T;
   static constexpr bool is_static = false;
-  static constexpr bool is_function = IsFunc_v<T>;
+  static constexpr bool is_func = IsFunc_v<T>;
 };
 
 template <typename T>
@@ -171,7 +169,7 @@ struct FieldTraits<T*> {
   using object_type = void;
   using value_type = T;
   static constexpr bool is_static = true;
-  static constexpr bool is_function = IsFunc_v<T>;
+  static constexpr bool is_func = IsFunc_v<T>;
 };
 
 template <typename T>
@@ -180,7 +178,7 @@ struct FieldTraits {
   using object_type = void;
   using value_type = T;
   static constexpr bool is_static = true;
-  static constexpr bool is_function = false;
+  static constexpr bool is_func = false;
 };
 
 template <typename T>
@@ -206,8 +204,6 @@ struct AttrList : detail::BaseList<Attrs...> {
 
 template <typename... Attrs>
 AttrList(Attrs...) -> AttrList<Attrs...>;
-template <typename... Attrs>
-AttrList(std::tuple<Attrs...>) -> AttrList<Attrs...>;
 
 template <typename T, typename AList>
 struct Field : FieldTraits<T>, detail::NamedValue<T> {
@@ -235,8 +231,6 @@ struct FieldList : detail::BaseList<Fields...> {
 
 template <typename... Fields>
 FieldList(Fields...) -> FieldList<Fields...>;
-template <typename... Fields>
-FieldList(std::tuple<Fields...>) -> FieldList<Fields...>;
 
 // name, type, bases, fields, attrs,
 template <typename T>
@@ -262,8 +256,6 @@ struct TypeInfoList : detail::BaseList<TypeInfos...> {
 
 template <typename... TypeInfos>
 TypeInfoList(TypeInfos...) -> TypeInfoList<TypeInfos...>;
-template <typename... TypeInfos>
-TypeInfoList(std::tuple<TypeInfos...>) -> TypeInfoList<TypeInfos...>;
 
 template <typename T, typename... Bases>
 struct TypeInfoBase {
@@ -291,14 +283,14 @@ struct TypeInfoBase {
   }
 
   template <typename U, typename Func>
-  static constexpr void DFS_ForEachVarOf(U&& obj, const Func& func) {
+  static constexpr void ForEachVarOf(U&& obj, const Func& func) {
     static_assert(std::is_same_v<type, std::decay_t<U>>);
     TypeInfo<type>::fields.ForEach([&](auto field) {
-      if constexpr (!field.is_static && !field.is_function)
+      if constexpr (!field.is_static && !field.is_func)
         func(std::forward<U>(obj).*(field.value));
     });
     TypeInfo<type>::bases.ForEach([&](auto base) {
-      base.DFS_ForEachVarOf(base.Forward(std::forward<U>(obj)), func);
+      base.ForEachVarOf(base.Forward(std::forward<U>(obj)), func);
     });
   }
 };
