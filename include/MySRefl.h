@@ -12,7 +12,7 @@ template <size_t idx, typename T, typename Func>
 static constexpr void ForNonStaticFieldOf(T&& obj, const Func& func) {
   const auto& field = std::get<idx>(Type<std::decay_t<T>>::fields);
   if constexpr (!field.is_static)
-    func(obj.*(field.ptr));
+    func(obj.*(field.value));
 }
 
 template <typename T, typename Func, size_t... Ns>
@@ -85,8 +85,7 @@ struct BaseList : std::tuple<Elems...> {
 namespace My::MySRefl {
 // field : member variable/function, static or non-static
 
-// fields
-// attrs
+// name, fields, attrs
 template <typename T>
 struct Type;
 
@@ -105,18 +104,18 @@ static constexpr bool IsFunc_v = IsFunc<Func>::value;
 template <typename... Args>
 struct Overload {
   template <typename R, typename T>
-  constexpr auto operator()(R (T::*ptr)(Args...)) const {
-    return ptr;
+  constexpr auto operator()(R (T::*func_ptr)(Args...)) const {
+    return func_ptr;
   }
 
   template <typename R, typename T>
-  constexpr auto operator()(R (T::*ptr)(Args...) const) const {
-    return ptr;
+  constexpr auto operator()(R (T::*func_ptr)(Args...) const) const {
+    return func_ptr;
   }
 
   template <typename R>
-  constexpr auto operator()(R (*ptr)(Args...)) const {
-    return ptr;
+  constexpr auto operator()(R (*func_ptr)(Args...)) const {
+    return func_ptr;
   }
 };
 
@@ -140,6 +139,15 @@ struct FieldTraits<T*> {
   using value_type = T;
   static constexpr bool is_static = true;
   static constexpr bool is_function = IsFunc_v<T>;
+};
+
+template <typename T>
+struct FieldTraits {
+  static_assert(std::is_enum_v<T>);
+  using object_type = void;
+  using value_type = T;
+  static constexpr bool is_static = true;
+  static constexpr bool is_function = false;
 };
 
 template <typename T = void>
@@ -196,11 +204,11 @@ template <typename T, typename AList>
 struct Field : FieldTraits<T> {
   static_assert(IsAttrList<AList>::value);
 
-  constexpr Field(std::string_view name, T ptr, AList attrs)
-      : name{name}, ptr{ptr}, attrs{attrs} {}
+  constexpr Field(std::string_view name, T value, AList attrs)
+      : name{name}, value{value}, attrs{attrs} {}
 
   std::string_view name;
-  T ptr;
+  T value;
   AList attrs;
 
   template <typename U>
