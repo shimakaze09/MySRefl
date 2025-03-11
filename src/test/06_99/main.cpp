@@ -3,8 +3,6 @@
 //
 
 #include <iostream>
-#include <vector>
-
 #include "MySRefl_99.h"
 
 using namespace std;
@@ -52,7 +50,7 @@ void test_basic() {
   });
 
   constexpr auto y_field =
-      MySRefl_BaseList_GetByName(TypeInfo<Point>::fields, "y");
+      MySRefl_ElemList_GetByName(TypeInfo<Point>::fields, "y");
   static_assert(y_field.name == "y");
 
   static_assert(TypeInfo<Point>::fields.Contains("x"));
@@ -99,8 +97,8 @@ void test_template() {
 
   cout << TypeInfo<Data<float>>::name << endl;
   constexpr auto valueAttrs =
-      MySRefl_BaseList_GetByName(TypeInfo<Data<float>>::fields, "value").attrs;
-  constexpr auto range = MySRefl_BaseList_GetByName(valueAttrs, "range").value;
+      MySRefl_ElemList_GetByName(TypeInfo<Data<float>>::fields, "value").attrs;
+  constexpr auto range = MySRefl_ElemList_GetByName(valueAttrs, "range").value;
   constexpr float range_min = range.first;
   constexpr float range_max = range.second;
   cout << "range min :" << range_min << endl;
@@ -236,16 +234,16 @@ void test_enum() {
   TypeInfo<Color>::fields.ForEach(
       [](auto field) { cout << field.name << endl; });
   static_assert(
-      MySRefl_BaseList_GetByName(TypeInfo<Color>::fields, "RED").value ==
+      MySRefl_ElemList_GetByName(TypeInfo<Color>::fields, "RED").value ==
       Color::RED);
   static_assert(
-      MySRefl_BaseList_GetByValue(TypeInfo<Color>::fields, Color::RED).name ==
+      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::RED).name ==
       "RED");
 
   constexpr Color c = Color::GREEN;
   constexpr auto c_attr =
-      MySRefl_BaseList_GetByValue(TypeInfo<Color>::fields, c).attrs;
-  static_assert(MySRefl_BaseList_GetByName(c_attr, "func").value() == 2);
+      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, c).attrs;
+  static_assert(MySRefl_ElemList_GetByName(c_attr, "func").value() == 2);
 }
 
 // ==============
@@ -263,13 +261,12 @@ struct TypeInfo<FuncList> : TypeInfoBase<FuncList> {
       Field{"Func0", &FuncList::Func0,
             AttrList{Attr{"argument_list",
                           AttrList{
-                              Attr{"@0", detail::NamedValue<void>{"a"}},
-                              Attr{"@1", detail::NamedValue<void>{"b"}},
+                              Attr{"@0", NamedValue<void>{"a"}},
+                              Attr{"@1", NamedValue<void>{"b"}},
                           }}}},
       Field{"Func1", &FuncList::Func1,
-            AttrList{
-                Attr{"argument_list",
-                     AttrList{Attr{"@0", detail::NamedValue<int>{"x", 1}}}}}}};
+            AttrList{Attr{"argument_list",
+                          AttrList{Attr{"@0", NamedValue<int>{"x", 1}}}}}}};
 };
 
 void test_function() {
@@ -278,10 +275,10 @@ void test_function() {
        << "====================" << endl;
 
   constexpr auto f0 =
-      MySRefl_BaseList_GetByName(TypeInfo<FuncList>::fields, "Func0");
+      MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func0");
   cout << f0.name << endl;
   constexpr auto f0_args =
-      MySRefl_BaseList_GetByName(f0.attrs, "argument_list");
+      MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
   f0_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -290,10 +287,10 @@ void test_function() {
   });
 
   constexpr auto f1 =
-      MySRefl_BaseList_GetByName(TypeInfo<FuncList>::fields, "Func1");
+      MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func1");
   cout << f1.name << endl;
   constexpr auto f1_args =
-      MySRefl_BaseList_GetByName(f1.attrs, "argument_list");
+      MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
   f1_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
