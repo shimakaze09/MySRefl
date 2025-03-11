@@ -113,7 +113,7 @@ struct Attr<void> : detail::NamedValue<void> {
 };
 
 template <size_t N>
-Attr(std::string_view, const char[N]) -> Attr<std::string_view>;
+Attr(std::string_view, const char (&)[N]) -> Attr<std::string_view>;
 Attr(std::string_view) -> Attr<void>;
 
 template <typename... Attrs>

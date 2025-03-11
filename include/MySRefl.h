@@ -95,7 +95,7 @@ struct BaseList {
   constexpr size_t FindByValue(T value) const {
     return FindIf([value](auto elem) {
       if constexpr (elem.has_value) {
-        if constexpr (elem.ValueTypeIs<T>())
+        if constexpr (elem.template ValueTypeIs<T>())
           return elem.value == value;
         else
           return false;
@@ -193,7 +193,7 @@ struct Attr<void> : detail::NamedValue<void> {
 };
 
 template <size_t N>
-Attr(std::string_view, const char[N]) -> Attr<std::string_view>;
+Attr(std::string_view, const char (&)[N]) -> Attr<std::string_view>;
 Attr(std::string_view) -> Attr<void>;
 
 template <typename... Attrs>
@@ -279,9 +279,10 @@ struct TypeInfoBase {
   }
 
   template <typename Func>
-  static constexpr void DFS(const Func& func) {
-    func(TypeInfo<type>{});
-    TypeInfo<type>::bases.ForEach([&](auto base) { base.DFS(func); });
+  static constexpr void DFS(const Func& func, size_t depth = 0) {
+    func(TypeInfo<type>{}, depth);
+    TypeInfo<type>::bases.ForEach(
+        [&](auto base) { base.DFS(func, depth + 1); });
   }
 
   template <typename U, typename Func>
