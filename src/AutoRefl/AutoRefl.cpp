@@ -65,8 +65,8 @@ string AutoRefl::Parse(string_view code) {
     // type attrs
     ss << indent << "static constexpr AttrList attrs = {" << endl;
     for (const auto& [key, value] : typeinfo.metas) {
-      ss << indent << indent << "Attr {" << "\"" << key << "\""
-         << (value.empty() ? "" : (", " + value)) << " }, " << endl;
+      ss << indent << indent << "Attr{" << "\"" << key << "\""
+         << (value.empty() ? "" : (", " + value)) << "}," << endl;
     }
     ss << indent << "};" << endl;  // end AttrList
 
@@ -91,6 +91,7 @@ string AutoRefl::Parse(string_view code) {
 
       ss << indent << indent << "}," << endl;
     }
+
     // func
     map<string, bool> overloadMap;
     for (const auto& funcInfo : typeinfo.funcInfos) {
@@ -108,7 +109,9 @@ string AutoRefl::Parse(string_view code) {
          << "\"" << funcInfo.name << "\", ";
 
       if (overloadMap.find(funcInfo.name)->second) {
-        ss << "static_cast<" << funcInfo.ret << "(" << type << "::*)(";
+        ss << "static_cast<" << funcInfo.ret;
+        if (!funcInfo.isStatic) ss << "(" << type << "::*)";
+        ss << "(";  // arguments begin
         for (size_t i = 0; i < funcInfo.params.size(); i++) {
           string type;
           for (size_t j = 0; j < funcInfo.params[i].specifiers.size(); j++) {
@@ -118,7 +121,7 @@ string AutoRefl::Parse(string_view code) {
           ss << type;
           if (i < funcInfo.params.size() - 1) ss << ", ";
         }
-        ss << ")";
+        ss << ")";  // arguments end
         for (size_t k = 0; k < funcInfo.qualifiers.size(); k++) {
           ss << funcInfo.qualifiers[k];
           if (k < funcInfo.qualifiers.size() - 1) ss << " ";
@@ -136,27 +139,33 @@ string AutoRefl::Parse(string_view code) {
         for (size_t i = 0; i < funcInfo.params.size(); i++) {
           ss << indent << indent << indent << indent << "Attr{" << "\"__@" << i
              << "\"";
-          ss << "," << endl
-             << indent << indent << indent << indent << indent << "AttrList{"
-             << endl
-             << indent << indent << indent << indent << indent << indent
-             << "Attr{\"__name\", \"" << funcInfo.params[i].name << "\"},"
-             << endl
-             << indent << indent << indent << indent << indent << indent
-             << "Attr{\"__default_value\""
-             << (funcInfo.params[i].defaultValue.empty()
-                     ? ""
-                     : (", " + funcInfo.params[i].defaultValue))
-             << "}," << endl;
-          for (const auto& [key, value] : funcInfo.params[i].metas) {
-            ss << indent << indent << indent << indent << indent << indent
-               << "Attr{" << "\"" << key << "\""
-               << (value.empty() ? "" : (", " + value)) << "}," << endl;
-          }
-          // end argument AttrList
-          ss << indent << indent << indent << indent << indent << "}" << endl;
-          ss << indent << indent << indent << indent << "},"
-             << endl;  // end argument Attr
+          if (!funcInfo.params[i].name.empty() ||
+              !funcInfo.params[i].defaultValue.empty() ||
+              !funcInfo.params[i].metas.empty()) {
+            ss << "," << endl
+               << indent << indent << indent << indent << indent << "AttrList{"
+               << endl
+               << indent << indent << indent << indent << indent << indent;
+            if (!funcInfo.params[i].name.empty()) {
+              ss << "Attr{\"__name\", \"" << funcInfo.params[i].name << "\"},"
+                 << endl;
+            }
+            if (!funcInfo.params[i].defaultValue.empty()) {
+              ss << indent << indent << indent << indent << indent << indent
+                 << "Attr{\"__default_value\", "
+                 << funcInfo.params[i].defaultValue << "}," << endl;
+            }
+            for (const auto& [key, value] : funcInfo.params[i].metas) {
+              ss << indent << indent << indent << indent << indent << indent
+                 << "Attr{" << "\"" << key << "\""
+                 << (value.empty() ? "" : (", " + value)) << "}," << endl;
+            }
+            // end argument AttrList
+            ss << indent << indent << indent << indent << indent << "}" << endl;
+            ss << indent << indent << indent << indent << "},"
+               << endl;  // end argument Attr
+          } else
+            ss << "}," << endl;  // end argument Attr
         }
         ss << indent << indent << indent << "}" << endl;  // function attr list
       }
@@ -253,12 +262,14 @@ antlrcpp::Any AutoRefl::visitMemberdeclaration(
     for (const auto& t : curFieldInfo.type_specifiers) info.ret += t;
     info.params = move(curFieldInfo.params);
     info.qualifiers = move(curFieldInfo.qualifiers);
+    info.isStatic = curFieldInfo.isStatic;
     curTypeInfo->funcInfos.emplace_back(move(info));
   } else {
     VarInfo info;
     info.metas = move(curFieldInfo.metas);
     info.name = move(curFieldInfo.name);
     info.access = curFieldInfo.access;
+    info.isStatic = curFieldInfo.isStatic;
     curTypeInfo->varInfos.emplace_back(move(info));
   }
 
@@ -267,6 +278,7 @@ antlrcpp::Any AutoRefl::visitMemberdeclaration(
   curFieldInfo.type_specifiers.clear();
   curFieldInfo.nontype_specifiers.clear();
   curFieldInfo.isFunc = false;
+  curFieldInfo.isStatic = false;
   inMember = false;
   curMetas = nullptr;
 
@@ -324,6 +336,7 @@ antlrcpp::Any AutoRefl::visitDeclspecifier(
       curFieldInfo.type_specifiers.push_back(ctx->getText());
     else
       curFieldInfo.nontype_specifiers.push_back(ctx->getText());
+    if (ctx->getText() == "static") curFieldInfo.isStatic = true;
   } else
     curParam->specifiers.push_back(ctx->getText());
 
