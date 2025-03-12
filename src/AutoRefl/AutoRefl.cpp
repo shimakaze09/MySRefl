@@ -449,7 +449,8 @@ antlrcpp::Any AutoRefl::visitMemberdeclaration(CPP14Parser::MemberdeclarationCon
 		|| ctx->static_assertdeclaration()
 		|| ctx->templatedeclaration()
 		|| ctx->aliasdeclaration()
-		|| ctx->emptydeclaration())
+		|| ctx->emptydeclaration()
+ 		|| ctx->getText() == ";")
 		return {};
 	
 	curFieldInfo.access = curAccessSpecifier;
