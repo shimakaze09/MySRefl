@@ -10,7 +10,7 @@ INIT_PROJECT()
 
 OPTION(MySRefl_Build_Parser "build parser" OFF)
 IF (MySRefl_Build_Parser)
-    ADD_DEP(MyANTLR 0.1.0)
+    ADD_DEP(MyANTLR 0.1.1)
 ENDIF ()
 
 ADD_SUB_DIRS_REC(include)

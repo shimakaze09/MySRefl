@@ -75,6 +75,7 @@ class AutoRefl : public CPP14Visitor {
     std::vector<FuncInfo> funcInfos;
     std::string templateParamList;
     std::vector<Param> templateParams;
+    bool isEnum{false};
   };
   struct TemplateInfo {
     std::string templateParamList;
@@ -503,14 +504,10 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitEnumspecifier(
-      CPP14Parser::EnumspecifierContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::EnumspecifierContext* ctx) override;
 
   virtual antlrcpp::Any visitEnumhead(
-      CPP14Parser::EnumheadContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::EnumheadContext* ctx) override;
 
   virtual antlrcpp::Any visitOpaqueenumdeclaration(
       CPP14Parser::OpaqueenumdeclarationContext* ctx) override {
@@ -533,9 +530,7 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitEnumeratordefinition(
-      CPP14Parser::EnumeratordefinitionContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::EnumeratordefinitionContext* ctx) override;
 
   virtual antlrcpp::Any visitEnumerator(
       CPP14Parser::EnumeratorContext* ctx) override {

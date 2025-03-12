@@ -12,7 +12,7 @@
 //     [x] - constructor / destructor
 //     [x] - ignore template function
 // [x] - static
-// [ ] - enum
+// [x] - enum
 // [ ] - bases
 // [ ] - main arguments parse
 

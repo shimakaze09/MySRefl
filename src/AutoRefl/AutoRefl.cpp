@@ -93,14 +93,14 @@ string AutoRefl::Parse(string_view code) {
       if (varInfo.access != AccessSpecifier::PUBLIC) continue;
 
       ss << indent << indent << "Field{"
-         << "\"" << varInfo.name << "\", "
-         << "&" << type << "::" << varInfo.name;
+         << "\"" << varInfo.name << "\", " << (typeinfo.isEnum ? "" : "&")
+         << type << "::" << varInfo.name;
 
       if (!varInfo.metas.empty()) {
-        ss << "," << endl << indent << indent << indent << "AttrList {" << endl;
+        ss << "," << endl << indent << indent << indent << "AttrList{" << endl;
         for (const auto& [key, value] : varInfo.metas) {
-          ss << indent << indent << indent << indent << "Attr {" << "\"" << key
-             << "\"" << (value.empty() ? "" : (", " + value)) << " }," << endl;
+          ss << indent << indent << indent << indent << "Attr{" << "\"" << key
+             << "\"" << (value.empty() ? "" : (", " + value)) << "}," << endl;
         }
         ss << indent << indent << indent << "}" << endl;  // end AttrList
         ss << indent << indent << "}," << endl;
@@ -278,9 +278,51 @@ antlrcpp::Any AutoRefl::visitClassspecifier(
   curTypeInfo->ns = curNamespace;
   curTypeInfo->templateParamList = move(curTemplateInfo.templateParamList);
   curTypeInfo->templateParams = move(curTemplateInfo.templateParams);
+  inMember = true;
+  auto result = visitChildren(ctx);
+  curTypeInfo = nullptr;
+  inMember = false;
+  return result;
+}
+
+antlrcpp::Any AutoRefl::visitEnumspecifier(
+    CPP14Parser::EnumspecifierContext* ctx) {
+  typeInfos.emplace_back();
+  curTypeInfo = &typeInfos.back();
+  curTypeInfo->isEnum = true;
+  curTypeInfo->ns = curNamespace;
+  curAccessSpecifier = AccessSpecifier::PUBLIC;
   auto result = visitChildren(ctx);
   curTypeInfo = nullptr;
   return result;
+}
+
+antlrcpp::Any AutoRefl::visitEnumhead(CPP14Parser::EnumheadContext* ctx) {
+  curTypeInfo->classkey = ctx->enumkey()->getText();
+  curTypeInfo->name = ctx->Identifier()->getText();
+  if (ctx->attributespecifierseq()) {
+    curMetas = &curTypeInfo->metas;
+    auto rst = visitAttributespecifierseq(ctx->attributespecifierseq());
+    curMetas = nullptr;
+    return rst;
+  } else
+    return {};
+}
+
+antlrcpp::Any AutoRefl::visitEnumeratordefinition(
+    CPP14Parser::EnumeratordefinitionContext* ctx) {
+  VarInfo info;
+  info.access = AccessSpecifier::PUBLIC;
+  info.isStatic = true;
+  info.name = ctx->enumerator()->getText();
+  curMetas = &info.metas;
+  if (ctx->attributespecifierseq()) {
+    curMetas = &info.metas;
+    visitAttributespecifierseq(ctx->attributespecifierseq());
+    curMetas = nullptr;
+  }
+  curTypeInfo->varInfos.emplace_back(move(info));
+  return {};
 }
 
 antlrcpp::Any AutoRefl::visitClasshead(CPP14Parser::ClassheadContext* ctx) {

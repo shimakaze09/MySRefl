@@ -11,11 +11,6 @@
 using namespace My::MySRefl;
 using namespace std;
 
-template <size_t N>
-constexpr size_t Func() {
-  return N;
-}
-
 enum class [[enum_attr("enum_attr_value")]] Color {
   RED [[enumerator_attr("enumerator_attr_value"), func(&Func<1>)]] = 1,
   GREEN [[func(&Func<2>)]] = 2,
@@ -23,15 +18,26 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 };
 
 template <>
-struct TypeInfo<Color> : TypeInfoBase<Color> {
+struct My::MySRefl::TypeInfo<Color> : My::MySRefl::TypeInfoBase<Color> {
+  static constexpr AttrList attrs = {
+      Attr{"enum_attr", "enum_attr_value"},
+  };
+
   static constexpr FieldList fields = {
       Field{"RED", Color::RED,
-            AttrList{Attr{"enumerator_attr", "enumerator_attr_value"},
-                     Attr{"func", &Func<1>}}},
-      Field{"GREEN", Color::GREEN, AttrList{Attr{"func", &Func<2>}}},
-      Field{"BLUE", Color::BLUE, AttrList{Attr{"func", &Func<3>}}}};
-
-  static constexpr AttrList attrs = {Attr{"enum_attr", "enum_attr_value"}};
+            AttrList{
+                Attr{"enumerator_attr", "enumerator_attr_value"},
+                Attr{"func", &Func<1>},
+            }},
+      Field{"GREEN", Color::GREEN,
+            AttrList{
+                Attr{"func", &Func<2>},
+            }},
+      Field{"BLUE", Color::BLUE,
+            AttrList{
+                Attr{"func", &Func<3>},
+            }},
+  };
 };
 
 int main() {
