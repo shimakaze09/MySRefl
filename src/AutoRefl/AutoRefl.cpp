@@ -47,15 +47,6 @@ string AutoRefl::Parse(string_view code) {
     string ns;
     for (auto a_ns : typeinfo.ns) ns += a_ns + "::";
     string type = ns + typeinfo.name;
-    /*string codetype;
-    for (size_t i = 0; i < type.size(); i++) {
-            if (type[i] == ':') {
-                    codetype += "_";
-                    i++;
-            }
-            else
-                    codetype += type[i];
-    }*/
 
     ss << "template<>" << endl
        << "struct My::MySRefl::TypeInfo<" << type << ">" << endl
@@ -63,12 +54,17 @@ string AutoRefl::Parse(string_view code) {
        << "{" << endl;
 
     // type attrs
-    ss << indent << "static constexpr AttrList attrs = {" << endl;
-    for (const auto& [key, value] : typeinfo.metas) {
-      ss << indent << indent << "Attr{" << "\"" << key << "\""
-         << (value.empty() ? "" : (", " + value)) << "}," << endl;
-    }
-    ss << indent << "};" << endl;  // end AttrList
+    ss << indent << "static constexpr AttrList attrs = {";
+    if (!typeinfo.metas.empty()) {
+      ss << endl;
+      for (const auto& [key, value] : typeinfo.metas) {
+        ss << indent << indent << "Attr{" << "\"" << key << "\""
+           << (value.empty() ? "" : (", " + value)) << "}," << endl;
+      }
+      ss << indent << "};" << endl;  // end AttrList
+    } else
+      ss << "};" << endl;  // end AttrList
+    ss << endl;
 
     // field
     ss << indent << "static constexpr FieldList fields = {" << endl;
@@ -105,30 +101,61 @@ string AutoRefl::Parse(string_view code) {
     for (const auto& funcInfo : typeinfo.funcInfos) {
       if (funcInfo.access != AccessSpecifier::PUBLIC) continue;
 
-      ss << indent << indent << "Fields{"
-         << "\"" << funcInfo.name << "\", ";
-
-      if (overloadMap.find(funcInfo.name)->second) {
-        ss << "static_cast<" << funcInfo.ret;
-        if (!funcInfo.isStatic) ss << "(" << type << "::*)";
-        ss << "(";  // arguments begin
-        for (size_t i = 0; i < funcInfo.params.size(); i++) {
-          string type;
-          for (size_t j = 0; j < funcInfo.params[i].specifiers.size(); j++) {
-            type += funcInfo.params[i].specifiers[j];
-            if (j < funcInfo.params[i].specifiers.size() - 1) type += " ";
-          }
-          ss << type;
-          if (i < funcInfo.params.size() - 1) ss << ", ";
-        }
-        ss << ")";  // arguments end
-        for (size_t k = 0; k < funcInfo.qualifiers.size(); k++) {
-          ss << funcInfo.qualifiers[k];
-          if (k < funcInfo.qualifiers.size() - 1) ss << " ";
-        }
-        ss << ">(&" << type << "::" << funcInfo.name << ")";
+      // name
+      string name;
+      bool isSpecial = false;
+      if (funcInfo.ret.empty()) {
+        isSpecial = true;
+        // constructor / destructor
+        if (funcInfo.name.find('~') != string::npos)
+          name = "__destructor";
+        else
+          name = "__constructor";
       } else
-        ss << "&" << type << "::" << funcInfo.name;
+        name = funcInfo.name;
+
+      ss << indent << indent << "Fields{"
+         << "\"" << name << "\", ";
+
+      // value
+      if (isSpecial) {
+        if (name == "__constructor") {
+          ss << "WrapConstructor<" << type << "(";
+          for (size_t i = 0; i < funcInfo.params.size(); i++) {
+            string type;
+            for (size_t j = 0; j < funcInfo.params[i].specifiers.size(); j++) {
+              type += funcInfo.params[i].specifiers[j];
+              if (j < funcInfo.params[i].specifiers.size() - 1) type += " ";
+            }
+            ss << type;
+            if (i < funcInfo.params.size() - 1) ss << ", ";
+          }
+          ss << ")>()";
+        } else
+          ss << "WrapDestructor<" << type << ">()";
+      } else {
+        if (overloadMap.find(funcInfo.name)->second) {
+          ss << "static_cast<" << funcInfo.ret;
+          if (!funcInfo.isStatic) ss << "(" << type << "::*)";
+          ss << "(";  // arguments begin
+          for (size_t i = 0; i < funcInfo.params.size(); i++) {
+            string type;
+            for (size_t j = 0; j < funcInfo.params[i].specifiers.size(); j++) {
+              type += funcInfo.params[i].specifiers[j];
+              if (j < funcInfo.params[i].specifiers.size() - 1) type += " ";
+            }
+            ss << type;
+            if (i < funcInfo.params.size() - 1) ss << ", ";
+          }
+          ss << ")";  // arguments end
+          for (size_t k = 0; k < funcInfo.qualifiers.size(); k++) {
+            ss << funcInfo.qualifiers[k];
+            if (k < funcInfo.qualifiers.size() - 1) ss << " ";
+          }
+          ss << ">(&" << type << "::" << funcInfo.name << ")";
+        } else
+          ss << "&" << type << "::" << funcInfo.name;
+      }
 
       if (!funcInfo.metas.empty() || !funcInfo.params.empty()) {
         ss << "," << endl << indent << indent << indent << "AttrList {" << endl;
@@ -137,8 +164,8 @@ string AutoRefl::Parse(string_view code) {
              << "\"" << (value.empty() ? "" : (", " + value)) << "}," << endl;
         }
         for (size_t i = 0; i < funcInfo.params.size(); i++) {
-          ss << indent << indent << indent << indent << "Attr{" << "\"__@" << i
-             << "\"";
+          ss << indent << indent << indent << indent << "Attr{" << "\"__arg_"
+             << i << "\"";
           if (!funcInfo.params[i].name.empty() ||
               !funcInfo.params[i].defaultValue.empty() ||
               !funcInfo.params[i].metas.empty()) {
@@ -168,9 +195,9 @@ string AutoRefl::Parse(string_view code) {
             ss << "}," << endl;  // end argument Attr
         }
         ss << indent << indent << indent << "}" << endl;  // function attr list
-      }
-
-      ss << indent << indent << "}," << endl;  // end Field
+        ss << indent << indent << "}," << endl;           // end Field
+      } else
+        ss << "}," << endl;  // end Field
     }
     ss << indent << "};" << endl;  // end FieldList
 
@@ -340,7 +367,18 @@ antlrcpp::Any AutoRefl::visitDeclspecifier(
   } else
     curParam->specifiers.push_back(ctx->getText());
 
-  return visitChildren(ctx);
+  return {};
+}
+
+antlrcpp::Any AutoRefl::visitPtroperator(CPP14Parser::PtroperatorContext* ctx) {
+  if (!inMember) return {};
+
+  if (!curParam)
+    curFieldInfo.type_specifiers.push_back(ctx->getText());
+  else
+    curParam->specifiers.push_back(ctx->getText());
+
+  return {};
 }
 
 antlrcpp::Any AutoRefl::visitUnqualifiedid(

@@ -39,6 +39,7 @@ class AutoRefl : public CPP14Visitor {
     // - friend
     // - typedef
     // - constexpr
+    // + ptroperator (*/&/&&)
     std::vector<std::string> nontype_specifiers;
     std::vector<std::string> type_specifiers;
 
@@ -688,9 +689,7 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitPtroperator(
-      CPP14Parser::PtroperatorContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::PtroperatorContext* ctx) override;
 
   virtual antlrcpp::Any visitCvqualifierseq(
       CPP14Parser::CvqualifierseqContext* ctx) override {

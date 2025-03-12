@@ -6,8 +6,8 @@
 
 #include "AttrList.h"
 #include "NamedValue.h"
+#include "Util.h"
 #include "detail/FieldTraits.h"
-#include "detail/Util.h"
 
 namespace My::MySRefl {
 template <typename T, typename AList>

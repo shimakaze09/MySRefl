@@ -6,7 +6,7 @@
 
 #include "ElemList.h"
 #include "Field.h"
-#include "detail/Util.h"
+#include "Util.h"
 
 namespace My::MySRefl {
 // Field's (name, value_type) must be unique
