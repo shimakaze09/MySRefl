@@ -19,16 +19,18 @@ class AutoRefl : public CPP14Visitor {
 
  private:
   enum class AccessSpecifier { PUBLIC, PROTECTED, PRIVATE };
+  struct Param {
+    std::map<std::string, std::string> metas;
+    std::vector<std::string> specifiers;  // -> type
+    std::string name;
+    std::string defaultValue;
+  };
+
   struct FieldInfo {
     std::string name;
     std::map<std::string, std::string> metas;
     AccessSpecifier access;
     bool isFunc{false};
-  };
-  struct VarInfo {
-    std::string name;
-    std::map<std::string, std::string> metas;
-    AccessSpecifier access;
 
     // - storage class specifier: register, static, thread_local, extern,
     // mutable
@@ -36,12 +38,25 @@ class AutoRefl : public CPP14Visitor {
     // - friend
     // - typedef
     // - constexpr
-    std::vector<std::string> specifiers;
+    std::vector<std::string> nontype_specifiers;
+    std::vector<std::string> type_specifiers;
+
+    std::vector<Param> params;
+    std::vector<std::string> qualifiers;  // cv, ref, except
+  };
+  struct VarInfo {
+    std::string name;
+    std::map<std::string, std::string> metas;
+    AccessSpecifier access;
   };
   struct FuncInfo {
     std::string name;
     std::map<std::string, std::string> metas;
     AccessSpecifier access;
+
+    std::string ret;
+    std::vector<Param> params;
+    std::vector<std::string> qualifiers;  // cv, ref, except
   };
   struct TypeInfo {
     std::vector<std::string> ns;  // namespace
@@ -56,8 +71,7 @@ class AutoRefl : public CPP14Visitor {
   std::vector<std::string> curNamespace;
   std::map<std::string, std::string>* curMetas{nullptr};
   TypeInfo* curTypeInfo{nullptr};
-  VarInfo* curVarInfo{nullptr};
-  FuncInfo* curFuncInfo{nullptr};
+  Param* curParam{nullptr};
   AccessSpecifier curAccessSpecifier{AccessSpecifier::PRIVATE};
   FieldInfo curFieldInfo;
   bool inMember{false};
@@ -736,9 +750,7 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitParameterdeclaration(
-      CPP14Parser::ParameterdeclarationContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::ParameterdeclarationContext* ctx) override;
 
   virtual antlrcpp::Any visitFunctiondefinition(
       CPP14Parser::FunctiondefinitionContext* ctx) override {
@@ -759,9 +771,7 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitInitializerclause(
-      CPP14Parser::InitializerclauseContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::InitializerclauseContext* ctx) override;
 
   virtual antlrcpp::Any visitInitializerlist(
       CPP14Parser::InitializerlistContext* ctx) override {
@@ -1036,5 +1046,4 @@ class AutoRefl : public CPP14Visitor {
     return visitChildren(ctx);
   }
 };
-
 }  // namespace My::MySRefl
