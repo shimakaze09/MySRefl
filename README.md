@@ -34,6 +34,7 @@ Header-only, tiny (99 lines) and powerful C++17 static reflection library.
     - diamond inheritance
     - iterate bases recursively
     - virtual inheritance
+- **parser**
 
 ## Example
 
@@ -112,6 +113,7 @@ int main() {
 ## Documentation
 
 - [Introduction](doc/intro.md)
+- parser (TODO)
 
 ## Integration
 
