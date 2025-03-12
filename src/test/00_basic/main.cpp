@@ -53,7 +53,7 @@ int main() {
   static_assert(TypeInfo<Point>::fields.Contains("x"));
 
   TypeInfo<Point>::attrs.ForEach([](auto attr) {
-    cout << "name   : " << attr.name << endl;
+    cout << "name: " << attr.name << endl;
     if constexpr (!attr.has_value)
       cout << "value : " << attr.value << endl;
   });

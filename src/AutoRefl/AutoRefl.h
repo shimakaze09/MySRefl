@@ -19,11 +19,15 @@ class AutoRefl : public CPP14Visitor {
 
  private:
   enum class AccessSpecifier { PUBLIC, PROTECTED, PRIVATE };
+
   struct Param {
+    size_t idx{static_cast<size_t>(-1)};
     std::map<std::string, std::string> metas;
     std::vector<std::string> specifiers;  // -> type
     std::string name;
     std::string defaultValue;
+
+    std::string SpecifiersToType() const;
   };
 
   struct FieldInfo {
@@ -69,6 +73,12 @@ class AutoRefl : public CPP14Visitor {
     std::map<std::string, std::string> metas;
     std::vector<VarInfo> varInfos;
     std::vector<FuncInfo> funcInfos;
+    std::string templateParamList;
+    std::vector<Param> templateParams;
+  };
+  struct TemplateInfo {
+    std::string templateParamList;
+    std::vector<Param> templateParams;
   };
 
   std::vector<TypeInfo> typeInfos;
@@ -78,6 +88,7 @@ class AutoRefl : public CPP14Visitor {
   Param* curParam{nullptr};
   AccessSpecifier curAccessSpecifier{AccessSpecifier::PRIVATE};
   FieldInfo curFieldInfo;
+  TemplateInfo curTemplateInfo;
   bool inMember{false};
 
   virtual antlrcpp::Any visitTranslationunit(
@@ -707,9 +718,7 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitDeclaratorid(
-      CPP14Parser::DeclaratoridContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::DeclaratoridContext* ctx) override;
 
   virtual antlrcpp::Any visitThetypeid(
       CPP14Parser::ThetypeidContext* ctx) override {
@@ -786,7 +795,9 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitClassname(
-      CPP14Parser::ClassnameContext* ctx) override;
+      CPP14Parser::ClassnameContext* ctx) override {
+    return visitChildren(ctx);
+  }
 
   virtual antlrcpp::Any visitClassspecifier(
       CPP14Parser::ClassspecifierContext* ctx) override;
@@ -795,9 +806,7 @@ class AutoRefl : public CPP14Visitor {
       CPP14Parser::ClassheadContext* ctx) override;
 
   virtual antlrcpp::Any visitClassheadname(
-      CPP14Parser::ClassheadnameContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::ClassheadnameContext* ctx) override;
 
   virtual antlrcpp::Any visitClassvirtspecifier(
       CPP14Parser::ClassvirtspecifierContext* ctx) override {
@@ -914,9 +923,7 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitTemplatedeclaration(
-      CPP14Parser::TemplatedeclarationContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::TemplatedeclarationContext* ctx) override;
 
   virtual antlrcpp::Any visitTemplateparameterlist(
       CPP14Parser::TemplateparameterlistContext* ctx) override {
@@ -924,14 +931,10 @@ class AutoRefl : public CPP14Visitor {
   }
 
   virtual antlrcpp::Any visitTemplateparameter(
-      CPP14Parser::TemplateparameterContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::TemplateparameterContext* ctx) override;
 
   virtual antlrcpp::Any visitTypeparameter(
-      CPP14Parser::TypeparameterContext* ctx) override {
-    return visitChildren(ctx);
-  }
+      CPP14Parser::TypeparameterContext* ctx) override;
 
   virtual antlrcpp::Any visitSimpletemplateid(
       CPP14Parser::SimpletemplateidContext* ctx) override {
