@@ -1,4 +1,4 @@
-IF (NOT MySRefl_Build_Parser)
+IF (NOT MySRefl_Build_AutoRefl)
     RETURN()
 ENDIF ()
 

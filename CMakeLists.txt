@@ -4,16 +4,17 @@ PROJECT(MySRefl VERSION 0.5.0 LANGUAGES CXX)
 MESSAGE(STATUS "Project: ${PROJECT_NAME} ${PROJECT_VERSION}")
 
 INCLUDE(cmake/InitMyCMake.cmake)
+INCLUDE(cmake/MySReflAutoRefl.cmake)
 INIT_MYCMAKE()
 
 INIT_PROJECT()
 
-OPTION(MySRefl_Build_Parser "build parser" OFF)
-IF (MySRefl_Build_Parser)
+OPTION(MySRefl_Build_AutoRefl "Build AutoRefl" OFF)
+IF (MySRefl_Build_AutoRefl)
     ADD_DEP(MyANTLR 0.1.1)
 ENDIF ()
 
 ADD_SUB_DIRS_REC(include)
 ADD_SUB_DIRS_REC(src)
 
-EXPORT_TARGETS(DIRECTORIES "include")
+EXPORT_TARGETS(DIRECTORIES "include;cmake")

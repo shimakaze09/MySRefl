@@ -72,7 +72,7 @@ Then we need to write a declaration for it.
  template<>
  struct TypeInfo<Point> : TypeInfoBase<Point> {
    // the name is declared by TypeInfoBase<Point>
-   // if you use USRefl_99.h, you should declare it here.
+   // if you use MySRefl_99.h, you should declare it here.
    // static constexpr std::string_view name = "struct Point";
  
    static constexpr FieldList fields = {
