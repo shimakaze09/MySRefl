@@ -28,31 +28,40 @@ struct D : B, C {
 };
 
 template <>
-struct TypeInfo<A> : TypeInfoBase<A> {
-  static constexpr FieldList fields = FieldList{Field{"a", &A::a}};
-
+struct My::MySRefl::TypeInfo<A> : My::MySRefl::TypeInfoBase<A> {
   static constexpr AttrList attrs = {};
+
+  static constexpr FieldList fields = {
+      Field{"a", &A::a},
+  };
 };
 
 template <>
-struct TypeInfo<B> : TypeInfoBase<B, Base<A, true>> {
-  static constexpr FieldList fields = FieldList{Field{"b", &B::b}};
-
+struct My::MySRefl::TypeInfo<B> : My::MySRefl::TypeInfoBase<B, Base<A>> {
   static constexpr AttrList attrs = {};
+
+  static constexpr FieldList fields = {
+      Field{"b", &B::b},
+  };
 };
 
 template <>
-struct TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
-  static constexpr FieldList fields = FieldList{Field{"c", &C::c}};
-
+struct My::MySRefl::TypeInfo<C> : My::MySRefl::TypeInfoBase<C, Base<A>> {
   static constexpr AttrList attrs = {};
+
+  static constexpr FieldList fields = {
+      Field{"c", &C::c},
+  };
 };
 
 template <>
-struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-  static constexpr FieldList fields = FieldList{Field{"d", &D::d}};
-
+struct My::MySRefl::TypeInfo<D>
+    : My::MySRefl::TypeInfoBase<D, Base<B>, Base<C>> {
   static constexpr AttrList attrs = {};
+
+  static constexpr FieldList fields = {
+      Field{"d", &D::d},
+  };
 };
 
 int main() {
