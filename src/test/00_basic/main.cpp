@@ -17,12 +17,20 @@ struct [[size(8)]] Point {
 };
 
 template <>
-struct TypeInfo<Point> : TypeInfoBase<Point> {
+struct My::MySRefl::TypeInfo<Point> : My::MySRefl::TypeInfoBase<Point> {
+  static constexpr AttrList attrs = {
+      Attr{"size", 8},
+  };
   static constexpr FieldList fields = {
-      Field{"x", &Point::x, AttrList{Attr{"not_serialize"}}},
-      Field{"y", &Point::y, AttrList{Attr{"info", "hello"}}}};
-
-  static constexpr AttrList attrs = {Attr{"size", 8}};
+      Field{"x", &Point::x,
+            AttrList{
+                Attr{"not_serialize"},
+            }},
+      Field{"y", &Point::y,
+            AttrList{
+                Attr{"info", "hello"},
+            }},
+  };
 };
 
 int main() {
