@@ -6,7 +6,8 @@ We have provided several examples to demonstrate the capabilities of the library
 
 All you need to do is writing a declaration for the class which needs to be reflected.
 
-The declaration is simple enough that we don't need any marco to simplify it.
+The declaration is simple enough that we don't need any marco to simplify it. **We also provide a parser to auto
+generate the declaration file**.
 
 The library is well-designed so it's very tiny (only 99 lines), so it's easy to get the whole idea of this
 library. [MySRefl_99.h](../include/MySRefl_99.h) is condensed from  [MySRefl.h](../include/MySRefl/MySRefl.h) which is
@@ -22,10 +23,10 @@ The library is noninvasive and static.
 
 We have provided several template classes to support the reflection, including
 
-- `template<typename T> NamedValue`: a value with a name (if value's type `T` is `void`, it means this object has no
-  value but a name).
+- `template<typename T> NamedValue`: a **value** with a **name** (if value's type `T` is `void`, it means this object
+  has no value but a name).
 - `template<typename... Elems> ElemList`: element list, the elements' types `Elems...` can be attributes, fields, type
-  information or bases. It is a base class of their list.
+  information or bases. It is a base class of their list. Actually, it's a `std::tuple`.
 - `template<typename T> Attr`: a field may have some attributes (key + value), value's type is `T`，it can be `void`.
 - `template<typename T, typename AList> Field`: a field is a named value with an attribute list. The value's type is
   `T`,
