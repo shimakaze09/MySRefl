@@ -46,8 +46,8 @@ Header-only, tiny (99 lines) and powerful C++17 static reflection library.
 using namespace My::MySRefl;
 using namespace std;
 
-// [[...]] act as (structured) command
-// they are useless in code
+// [[...]] act as (structured) comments
+// they are useless in the code
 struct [[size(8)]] Point {
 	[[not_serialize]]
 	float x;
@@ -98,6 +98,18 @@ int main() {
 	});
 }
 ```
+
+result is
+
+ ```
+ x
+ not_serialize
+ y
+ info: hello
+ size
+ x : 1
+ y : 2
+ ```
 
 **other example**
 
