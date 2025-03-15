@@ -132,7 +132,7 @@ Then you can write some code with the reflection.
 **iterate member variables of an object**
 
  ```c++
- TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto&& var) {
-   cout << var << endl;
+ TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto field, auto&& var) {
+   cout << field.name << " : " << var << endl;
  });
  ```
