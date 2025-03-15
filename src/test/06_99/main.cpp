@@ -190,11 +190,11 @@ void test_inheritance() {
   d.b = 3;
   d.c = 4;
   d.d = 5;
-  TypeInfo<D>::ForEachVarOf(std::move(d), [](auto field, auto&& var) mutable {
+  TypeInfo<D>::ForEachVarOf(std::move(d), [](auto field, auto&& var) {
     static_assert(std::is_rvalue_reference_v<decltype(var)>);
     cout << field.name << " : " << var << endl;
   });
-  TypeInfo<D>::ForEachVarOf(d, [](auto field, auto&& var) mutable {
+  TypeInfo<D>::ForEachVarOf(d, [](auto field, auto&& var) {
     static_assert(std::is_lvalue_reference_v<decltype(var)>);
     cout << field.name << " : " << var << endl;
   });
@@ -279,7 +279,8 @@ void test_function() {
   constexpr auto f0 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func0");
   cout << f0.name << endl;
-  constexpr auto f0_args = MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
+  constexpr auto f0_args =
+      MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
   f0_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -290,7 +291,8 @@ void test_function() {
   constexpr auto f1 =
       MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func1");
   cout << f1.name << endl;
-  constexpr auto f1_args = MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
+  constexpr auto f1_args =
+      MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
   f1_args.value.ForEach([](auto arg) {
     cout << arg.name << ": " << arg.value.name;
     if constexpr (arg.value.has_value)
@@ -394,7 +396,7 @@ void test_virtual() {
     cout << field.name << " : " << var << endl;
   });
   cout << "[var : right]" << endl;
-  TypeInfo<VD>::ForEachVarOf(d, [](auto field, auto&& var) mutable {
+  TypeInfo<VD>::ForEachVarOf(d, [](auto field, auto&& var) {
     static_assert(std::is_lvalue_reference_v<decltype(var)>);
     cout << field.name << " : " << var << endl;
   });

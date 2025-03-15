@@ -93,15 +93,15 @@ int main() {
         cout << endl;
 	});
 
-	TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto&& var) {
-		cout << var << endl;
+	TypeInfo<Point>::ForEachVarOf(Point{ 1,2 }, [](auto field, auto&& var) {
+      cout << field.name << " : " << var << endl;
 	});
 }
 ```
 
 **other example**
 
-- 99 line: [MySRefl_99.h](include/MySRefl_99.h)，[test](src/test/06_99/main.cpp)
+- 99 line: [MySRefl_99.h](include/MySRefl_99.h), [test](src/test/06_99/main.cpp)
 - [template](src/test/01_template/main.cpp)
 - [static](src/test/02_static/main.cpp)
 - [func](src/test/03_func/main.cpp)
