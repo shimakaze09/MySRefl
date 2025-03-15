@@ -43,18 +43,6 @@ constexpr auto Acc(L l, F&& f, R&& r, std::index_sequence<N0, Ns...>) {
              std::index_sequence<Ns...>{});
 }
 
-template <typename TI, typename U, typename F>
-constexpr void NV_Var(TI info, U&& u, F&& f) {
-  info.fields.ForEach([&](auto k) {
-    if constexpr (!k.is_static && !k.is_func)
-      std::forward<F>(f)(std::forward<U>(u).*(k.value));
-  });
-  info.bases.ForEach([&](auto b) {
-    if constexpr (!b.is_virtual)
-      NV_Var(b.info, b.info.Forward(std::forward<U>(u)), std::forward<F>(f));
-  });
-}
-
 template <size_t D, typename T, typename Acc, typename F>
 constexpr auto DFS_Acc(T t, F&& f, Acc&& acc) {
   return t.bases.Accumulate(std::forward<Acc>(acc), [&](auto&& r, auto b) {
@@ -65,6 +53,18 @@ constexpr auto DFS_Acc(T t, F&& f, Acc&& acc) {
       return DFS_Acc<D + 1>(
           b.info, std::forward<F>(f),
           std::forward<F>(f)(std::forward<decltype(r)>(r), b.info, D + 1));
+  });
+}
+
+template <typename TI, typename U, typename F>
+constexpr void NV_Var(TI info, U&& u, F&& f) {
+  info.fields.ForEach([&](auto k) {
+    if constexpr (!k.is_static && !k.is_func)
+      std::forward<F>(f)(k, std::forward<U>(u).*(k.value));
+  });
+  info.bases.ForEach([&](auto b) {
+    if constexpr (!b.is_virtual)
+      NV_Var(b.info, b.info.Forward(std::forward<U>(u)), std::forward<F>(f));
   });
 }
 }  // namespace My::MySRefl::detail
@@ -273,7 +273,7 @@ struct TypeInfoBase {
     VirtualBases().ForEach([&](auto vb) {
       vb.fields.ForEach([&](auto fld) {
         if constexpr (!fld.is_static && !fld.is_func)
-          std::forward<Func>(func)(std::forward<U>(obj).*(fld.value));
+          std::forward<Func>(func)(fld, std::forward<U>(obj).*(fld.value));
       });
     });
     detail::NV_Var(TypeInfo<type>{}, std::forward<U>(obj),
