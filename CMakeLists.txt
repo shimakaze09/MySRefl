@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.20 FATAL_ERROR)
 
-PROJECT(MySRefl VERSION 0.5.4 LANGUAGES CXX)
+PROJECT(MySRefl VERSION 0.5.5 LANGUAGES CXX)
 MESSAGE(STATUS "Project: ${PROJECT_NAME} ${PROJECT_VERSION}")
 
 INCLUDE(cmake/InitMyCMake.cmake)
@@ -11,10 +11,15 @@ INIT_PROJECT()
 
 OPTION(MySRefl_Build_AutoRefl "Build AutoRefl, need Java" OFF)
 IF (MySRefl_Build_AutoRefl)
-    ADD_DEP(MyANTLR 0.1.3)
+    ADD_DEP(MyANTLR 0.1.4)
 ENDIF ()
 
 ADD_SUB_DIRS_REC(include)
 ADD_SUB_DIRS_REC(src)
 
-EXPORT_TARGETS(DIRECTORIES "include;cmake")
+EXPORT_TARGETS(
+        TARGET
+        DIRECTORIES
+        "include"
+        "cmake"
+)

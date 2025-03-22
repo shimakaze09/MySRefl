@@ -4,6 +4,7 @@ ENDIF ()
 
 ADD_TARGET(
         MODE EXE
+        OUTPUT_NAME AutoRefl
         LIB
         My::MyANTLR_ParserCpp14
 )
