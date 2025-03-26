@@ -2,8 +2,19 @@ MESSAGE(STATUS "Config @PROJECT_NAME@ @PROJECT_VERSION@ ...")
 
 @PACKAGE_INIT@
 
+IF (@MySRefl_Build_AutoRefl@)
+    LIST(APPEND INSTALL_FILES "cmake/MySReflAutoRefl.cmake")
+ENDIF ()
+
+IF (NOT @MySRefl_NotUseNameof@)
+    CPMAddPackage(
+            NAME nameof
+            GITHUB_REPOSITORY Neargye/nameof
+            GIT_TAG 0e8bec0
+    )
+ENDIF ()
+
 INCLUDE("${CMAKE_CURRENT_LIST_DIR}/Init.cmake")
-INCLUDE("${CMAKE_CURRENT_LIST_DIR}/MySReflAutoRefl.cmake")
 
 @MY_PACKAGE_INIT@
 

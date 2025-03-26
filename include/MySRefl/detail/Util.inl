@@ -30,7 +30,9 @@ template <typename T, typename... Args>
 struct ConstructorWrapper<T(Args...)> {
   static constexpr auto run() {
     return static_cast<void (*)(T*, Args...)>([](T* ptr, Args... args) {
+#ifdef assert
       assert(ptr != nullptr);
+#endif
       /*return*/ new (ptr) T{std::forward<Args>(args)...};
     });
   }

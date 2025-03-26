@@ -25,14 +25,14 @@ template <typename T, typename... Bases>
 template <typename Derived>
 constexpr auto&& TypeInfoBase<T, Bases...>::Forward(
     Derived&& derived) noexcept {
-  static_assert(std::is_base_of_v<type, std::decay_t<Derived>>);
+  static_assert(std::is_base_of_v<Type, std::decay_t<Derived>>);
   using DecayDerived = std::decay_t<Derived>;
   if constexpr (std::is_same_v<const DecayDerived&, Derived>)
-    return static_cast<const type&>(derived);
+    return static_cast<const Type&>(derived);
   else if constexpr (std::is_same_v<DecayDerived&, Derived>)
-    return static_cast<type&>(derived);
+    return static_cast<Type&>(derived);
   else if constexpr (std::is_same_v<DecayDerived, Derived>)
-    return static_cast<type&&>(derived);
+    return static_cast<Type&&>(derived);
   else
     static_assert(true);  // volitile
 }
@@ -72,9 +72,9 @@ template <typename T, typename... Bases>
 template <typename Init, typename Func>
 constexpr auto TypeInfoBase<T, Bases...>::DFS_Acc(Init&& init, Func&& func) {
   return detail_DFS_Acc<0>(
-      TypeInfo<type>{},
+      TypeInfo<Type>{},
       VirtualBases().Accumulate(
-          func(std::forward<Init>(init), TypeInfo<type>{}, 0),
+          func(std::forward<Init>(init), TypeInfo<Type>{}, 0),
           [&](auto&& acc, auto vb) {
             return std::forward<Func>(func)(std::forward<decltype(acc)>(acc),
                                             vb, 1);
@@ -84,7 +84,7 @@ constexpr auto TypeInfoBase<T, Bases...>::DFS_Acc(Init&& init, Func&& func) {
 
 template <typename T, typename... Bases>
 template <typename Func>
-static constexpr void TypeInfoBase<T, Bases...>::DFS_ForEach(Func&& func) {
+constexpr void TypeInfoBase<T, Bases...>::DFS_ForEach(Func&& func) {
   DFS_Acc(0, [&](auto, auto t, size_t depth) {
     std::forward<Func>(func)(t, depth);
     return 0;
@@ -94,14 +94,14 @@ static constexpr void TypeInfoBase<T, Bases...>::DFS_ForEach(Func&& func) {
 template <typename T, typename... Bases>
 template <typename U, typename Func>
 constexpr void TypeInfoBase<T, Bases...>::ForEachVarOf(U&& obj, Func&& func) {
-  static_assert(std::is_same_v<type, std::decay_t<U>>);
+  static_assert(std::is_same_v<Type, std::decay_t<U>>);
   VirtualBases().ForEach([&](auto vb) {
     vb.fields.ForEach([&](auto field) {
       if constexpr (!field.is_static && !field.is_func)
         std::forward<Func>(func)(field, std::forward<U>(obj).*(field.value));
     });
   });
-  detail::ForEachNonVirtualVarOf(TypeInfo<type>{}, std::forward<U>(obj),
+  detail::ForEachNonVirtualVarOf(TypeInfo<Type>{}, std::forward<U>(obj),
                                  std::forward<Func>(func));
 }
 }  // namespace My::MySRefl

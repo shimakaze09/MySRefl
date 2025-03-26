@@ -17,21 +17,25 @@
 // [x] - nested namespace name
 // [ ] - main arguments parse
 
+#include "MetaGenerator.h"
+#include "TypeInfoGenerator.h"
+
 #include <fstream>
 #include <iostream>
-
-#include "AutoRefl.h"
+#include <sstream>
 
 using namespace My::MySRefl;
 using namespace std;
 
 string ReadFileIntoString(const char* filename) {
   ifstream ifile(filename);
-  if (!ifile.is_open()) return "";
+  if (!ifile.is_open())
+    return "";
 
   ostringstream buf;
   char ch;
-  while (buf && ifile.get(ch)) buf.put(ch);
+  while (buf && ifile.get(ch))
+    buf.put(ch);
   return buf.str();
 }
 
@@ -46,10 +50,13 @@ int main(int argc, char** argv) {
 
   auto code = ReadFileIntoString(inputPath.c_str());
 
-  AutoRefl autorefl;
-  auto result = autorefl.Parse(code);
+  MetaGenerator metaGenerator;
+  TypeInfoGenerator typeinfoGenerator;
+  auto typeMetas = metaGenerator.Parse(code);
+  auto rst = typeinfoGenerator.Generate(typeMetas);
   auto curout = ReadFileIntoString(inputPath.c_str());
-  if (curout == result) return 0;
+  if (curout == rst)
+    return 0;
 
   ofstream out(outputPath);
   if (!out.is_open()) {
@@ -57,7 +64,7 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  out << result;
+  out << rst;
   out.close();
 
   return 0;
