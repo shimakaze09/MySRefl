@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <string_view>
 #include "NamedValue.h"
 
 namespace My::MySRefl {
@@ -12,13 +13,15 @@ namespace My::MySRefl {
 // [member]
 // std::string_view name
 // T value (T == void -> no value)
-template <typename T>
+template <typename T, typename Char, Char... chars>
 struct Attr;
 
-template <size_t N>
-Attr(std::string_view, const char (&)[N]) -> Attr<std::string_view>;
+template <size_t N, typename Char, Char... chars>
+Attr(std::integer_sequence<Char, chars...>, const char (&)[N])
+    -> Attr<std::string_view, Char, chars...>;
 
-Attr(std::string_view) -> Attr<void>;
+template <typename Char, Char... chars>
+Attr(std::integer_sequence<Char, chars...>) -> Attr<void, Char, chars...>;
 }  // namespace My::MySRefl
 
 #include "detail/Attr.inl"

@@ -5,14 +5,31 @@
 #pragma once
 
 #include <string_view>
+#include "detail/NamedValue.inl"
+
+// [MySRefl static C-style string]
+// std::integer_sequence<Char, chars...>
+// in C++20, we can easily put a string into template parameter list
+// but in C++17, we just can use this disgusting trick
+#define MYSTR(s)                              \
+  (My::MySRefl::detail::prepare([] {          \
+    struct tmp {                              \
+      static constexpr decltype(auto) get() { \
+        return s;                             \
+      }                                       \
+    };                                        \
+    return tmp{};                             \
+  }()))
 
 namespace My::MySRefl {
-template <typename T>
+template <typename T, typename Char, Char... chars>
 struct NamedValue;
 
-template <typename T>
+template <typename T, typename Char, Char... chars>
 struct NamedValueBase {
-  std::string_view name;
+  using NameTag = std::integer_sequence<Char, chars...>;
+  static constexpr char name_data[]{chars..., static_cast<Char>(0)};
+  static constexpr std::basic_string_view<Char> name{name_data};
   static constexpr bool has_value = !std::is_void_v<T>;
 
   template <typename U>
@@ -26,12 +43,12 @@ struct NamedValueBase {
   }
 };
 
-template <typename T>
-struct NamedValue : NamedValueBase<T> {
+template <typename T, typename Char, Char... chars>
+struct NamedValue : NamedValueBase<T, Char, chars...> {
   T value;
 
-  constexpr NamedValue(std::string_view name, T value)
-      : NamedValueBase<T>{name}, value{value} {}
+  constexpr NamedValue(std::integer_sequence<Char, chars...>, T value)
+      : value{value} {}
 
   template <typename U>
   constexpr bool operator==(U v) const {
@@ -42,9 +59,9 @@ struct NamedValue : NamedValueBase<T> {
   }
 };
 
-template <>
-struct NamedValue<void> : NamedValueBase<void> {
-  constexpr NamedValue(std::string_view name) : NamedValueBase<void>{name} {}
+template <typename Char, Char... chars>
+struct NamedValue<void, Char, chars...> : NamedValueBase<void, Char, chars...> {
+  constexpr NamedValue(std::integer_sequence<Char, chars...>) {}
 
   template <typename U>
   constexpr bool operator==(U) const {
@@ -52,7 +69,10 @@ struct NamedValue<void> : NamedValueBase<void> {
   }
 };
 
-NamedValue(std::string_view) -> NamedValue<void>;
-template <typename T, typename U>
-NamedValue(std::string_view, U) -> NamedValue<U>;
+template <typename Char, Char... chars>
+NamedValue(std::integer_sequence<Char, chars...>)
+    -> NamedValue<void, Char, chars...>;
+template <typename T, typename Char, Char... chars>
+NamedValue(std::integer_sequence<Char, chars...>, T)
+    -> NamedValue<T, Char, chars...>;
 }  // namespace My::MySRefl

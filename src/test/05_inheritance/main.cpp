@@ -29,23 +29,23 @@ struct D : B, C {
 
 template <>
 struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+#ifdef MY_MYSREFL_NOT_USE_NAMEOF
   static constexpr char name[2] = "A";
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{"a", &Type::a},
+      Field{MYSTR("a"), &Type::a},
   };
 };
 
 template <>
 struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+#ifdef MY_MYSREFL_NOT_USE_NAMEOF
   static constexpr char name[2] = "B";
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{"b", &Type::b},
+      Field{MYSTR("b"), &Type::b},
   };
 };
 
@@ -56,18 +56,18 @@ struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{"c", &Type::c},
+      Field{MYSTR("c"), &Type::c},
   };
 };
 
 template <>
 struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-#ifdef UBPA_USREFL_NOT_USE_NAMEOF
+#ifdef MY_MYSREFL_NOT_USE_NAMEOF
   static constexpr char name[2] = "D";
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{"d", &Type::d},
+      Field{MYSTR("d"), &Type::d},
   };
 };
 

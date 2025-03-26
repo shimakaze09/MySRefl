@@ -30,20 +30,21 @@ struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr char name[6] = "Point";
 #endif
   static constexpr AttrList attrs = {
-      Attr{"size", 8},
+      Attr{MYSTR("size"), 8},
   };
   static constexpr FieldList fields = {
-      Field{"x", &Type::x,
+      Field{MYSTR("x"), &Type::x,
             AttrList{
-                Attr{"not_serialize"},
+                Attr{MYSTR("not_serialize")},
             }},
-      Field{"y", &Type::y,
+      Field{MYSTR("y"), &Type::y,
             AttrList{
-                Attr{"info", "hello"},
+                Attr{MYSTR("info"), "hello"},
             }},
-      Field{"Sum", static_cast<float (Type::*)() const>(&Type::Sum)},
-      Field{"Sum", static_cast<float (Type::*)(float) const>(&Type::Sum)},
-      Field{"id", Type::id},
+      Field{MYSTR("Sum"), static_cast<float (Type::*)() const>(&Type::Sum)},
+      Field{MYSTR("Sum"),
+            static_cast<float (Type::*)(float) const>(&Type::Sum)},
+      Field{MYSTR("id"), Type::id},
   };
 };
 

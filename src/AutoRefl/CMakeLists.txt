@@ -7,4 +7,6 @@ ADD_TARGET(
         OUTPUT_NAME AutoRefl
         LIB
         My::MyANTLR_ParserCpp14
+        INC
+        "${PROJECT_SOURCE_DIR}/include"
 )

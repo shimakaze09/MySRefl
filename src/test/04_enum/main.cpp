@@ -28,21 +28,21 @@ struct My::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
   static constexpr char name[6] = "Color";
 #endif
   static constexpr AttrList attrs = {
-      Attr{"enum_attr", "enum_attr_value"},
+      Attr{MYSTR("enum_attr"), "enum_attr_value"},
   };
   static constexpr FieldList fields = {
-      Field{"RED", Type::RED,
+      Field{MYSTR("RED"), Type::RED,
             AttrList{
-                Attr{"enumerator_attr", "enumerator_attr_value"},
-                Attr{"func", &Func<1>},
+                Attr{MYSTR("enumerator_attr"), "enumerator_attr_value"},
+                Attr{MYSTR("func"), &Func<1>},
             }},
-      Field{"GREEN", Type::GREEN,
+      Field{MYSTR("GREEN"), Type::GREEN,
             AttrList{
-                Attr{"func", &Func<2>},
+                Attr{MYSTR("func"), &Func<2>},
             }},
-      Field{"BLUE", Type::BLUE,
+      Field{MYSTR("BLUE"), Type::BLUE,
             AttrList{
-                Attr{"func", &Func<3>},
+                Attr{MYSTR("func"), &Func<3>},
             }},
   };
 };
@@ -53,15 +53,62 @@ int main() {
   TypeInfo<Color>::fields.ForEach(
       [](auto field) { cout << field.name << endl; });
 
-  static_assert(
-      MySRefl_ElemList_GetByName(TypeInfo<Color>::fields, "RED").value ==
-      Color::RED);
-  static_assert(
-      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::RED).name ==
-      "RED");
+  Color red = Color::RED;
+  std::string_view nameof_red = "RED";
 
-  constexpr Color c = Color::GREEN;
-  constexpr auto c_attr =
-      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, c).attrs;
-  static_assert(MySRefl_ElemList_GetByName(c_attr, "func").value() == 2);
+  // name -> value
+  {
+    // compile-time
+    static_assert(TypeInfo<Color>::fields.ValueOfName<Color>("GREEN") ==
+                  Color::GREEN);
+
+    // runtime
+    assert(TypeInfo<Color>::fields.ValueOfName<Color>(nameof_red) == red);
+  }
+
+  // value -> name
+  {
+    // compile-time
+    static_assert(TypeInfo<Color>::fields.NameOfValue(Color::GREEN) == "GREEN");
+
+    // runtime
+    assert(TypeInfo<Color>::fields.NameOfValue(red) == nameof_red);
+  }
+
+  // name -> attr
+  {
+    // compile-time
+    static_assert(TypeInfo<Color>::fields.Find(MYSTR("GREEN"))
+                      .attrs.Find(MYSTR("func"))
+                      .value() == 2);
+    // runtime
+    size_t rst = static_cast<size_t>(-1);
+    TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
+      if (field.name == nameof_red) {
+        rst = field.attrs.Find(MYSTR("func")).value();
+        return true;
+      } else
+        return false;
+    });
+    assert(rst == 1);
+  }
+
+  // value -> attr
+  {
+    static_assert(
+        MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN)
+            .attrs.Find(MYSTR("func"))
+            .value() == 2);
+
+    // runtime
+    size_t rst = static_cast<size_t>(-1);
+    TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
+      if (field.value == red) {
+        rst = field.attrs.Find(MYSTR("func")).value();
+        return true;
+      } else
+        return false;
+    });
+    assert(rst == 1);
+  }
 }

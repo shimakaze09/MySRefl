@@ -20,8 +20,8 @@ struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{"x", &Type::x},
-      Field{"y", &Type::y},
+      Field{MYSTR("x"), &Type::x},
+      Field{MYSTR("y"), &Type::y},
   };
 };
 
@@ -30,4 +30,8 @@ int main() {
   TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
     cout << field.name << ": " << var << endl;
   });
+  constexpr auto field_x = TypeInfo<Point>::fields.Find(MYSTR("x"));
+  cout << p.*field_x.value << endl;
+  constexpr bool contains_y = TypeInfo<Point>::fields.Contains(MYSTR("y"));
+  static_assert(contains_y);
 }

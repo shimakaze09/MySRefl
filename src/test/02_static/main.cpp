@@ -24,18 +24,18 @@ struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr char name[6] = "Point";
 #endif
   static constexpr AttrList attrs = {
-      Attr{"size", 8},
+      Attr{MYSTR("size"), 8},
   };
   static constexpr FieldList fields = {
-      Field{"x", &Type::x,
+      Field{MYSTR("x"), &Type::x,
             AttrList{
-                Attr{"not_serialize"},
+                Attr{MYSTR("not_serialize")},
             }},
-      Field{"y", &Type::y,
+      Field{MYSTR("y"), &Type::y,
             AttrList{
-                Attr{"info", "hello"},
+                Attr{MYSTR("info"), "hello"},
             }},
-      Field{"id", Type::id},
+      Field{MYSTR("id"), Type::id},
   };
 };
 
@@ -51,11 +51,10 @@ int main() {
     });
   });
 
-  constexpr auto y_idx = TypeInfo<Point>::fields.Find("y");
-  constexpr auto y_field = TypeInfo<Point>::fields.Get<y_idx>();
+  constexpr auto y_field = TypeInfo<Point>::fields.Find(MYSTR("y"));
   static_assert(y_field.name == "y");
 
-  static_assert(TypeInfo<Point>::fields.Contains("x"));
+  static_assert(TypeInfo<Point>::fields.Contains(MYSTR("x")));
 
   TypeInfo<Point>::attrs.ForEach([](auto attr) {
     cout << "name   : " << attr.name << endl;
