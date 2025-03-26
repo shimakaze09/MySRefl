@@ -5,8 +5,9 @@ ENDIF ()
 
 SET(libs "")
 SET(defines "")
-IF (NOT MySRefl_NotUseNameof)
+IF (MySRefl_UseNameof)
     LIST(APPEND libs nameof::nameof)
+ELSE ()
     LIST(APPEND defines MY_MYSREFL_NOT_USE_NAMEOF)
 ENDIF ()
 

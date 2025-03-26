@@ -6,7 +6,7 @@ IF (@MySRefl_Build_AutoRefl@)
     LIST(APPEND INSTALL_FILES "cmake/MySReflAutoRefl.cmake")
 ENDIF ()
 
-IF (NOT @MySRefl_NotUseNameof@)
+IF (NOT @MySRefl_UseNameof@)
     CPMAddPackage(
             NAME nameof
             GITHUB_REPOSITORY Neargye/nameof

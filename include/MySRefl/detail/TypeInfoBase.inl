@@ -74,7 +74,8 @@ constexpr auto TypeInfoBase<T, Bases...>::DFS_Acc(Init&& init, Func&& func) {
   return detail_DFS_Acc<0>(
       TypeInfo<Type>{},
       VirtualBases().Accumulate(
-          func(std::forward<Init>(init), TypeInfo<Type>{}, 0),
+          std::forward<Func>(func)(std::forward<Init>(init), TypeInfo<Type>{},
+                                   0),
           [&](auto&& acc, auto vb) {
             return std::forward<Func>(func)(std::forward<decltype(acc)>(acc),
                                             vb, 1);

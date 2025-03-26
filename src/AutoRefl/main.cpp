@@ -2,9 +2,6 @@
 // Created by Admin on 12/03/2025.
 //
 
-// TODO
-// [ ] main arguments parse
-
 #include "MetaGenerator.h"
 #include "TypeInfoGenerator.h"
 

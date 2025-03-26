@@ -15,8 +15,11 @@ IF (MySRefl_Build_AutoRefl)
     ADD_DEP(MyANTLR 0.2.0)
 ENDIF ()
 
-OPTION(MySRefl_NotUseNameof "not use nameof" ON)
-IF (NOT MySRefl_NotUseNameof)
+SET(OPTION_CPM "")
+
+OPTION(MySRefl_UseNameof "not use nameof" OFF)
+IF (MySRefl_UseNameof)
+    SET(OPTION_CPM "CPM")
     CPMAddPackage(
             NAME nameof
             GITHUB_REPOSITORY Neargye/nameof
@@ -40,7 +43,7 @@ INSTALL(
 
 EXPORT_TARGETS(
         TARGET
-        CPM
+        ${OPTION_CPM}
         DIRECTORIES
         "include"
         "cmake"
