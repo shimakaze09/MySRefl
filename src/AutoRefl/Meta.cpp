@@ -8,8 +8,6 @@
 
 using namespace My::MySRefl;
 
-// ns::name
-// name
 std::string Attr::GenerateName(bool withoutQuatation) const {
   auto rst = ns.empty() ? name : ns + "::" + name;
   if (withoutQuatation)
@@ -40,6 +38,8 @@ std::string Parameter::GenerateTypeName() const {
 
 std::string Parameter::GenerateParameterName() const {
   std::string rst = GenerateTypeName();
+  if (isPacked)
+    rst += "...";
   rst += " ";
   rst += name;
   return rst;
@@ -52,7 +52,7 @@ std::string Parameter::GenerateArgumentName() const {
   return rst;
 }
 
-std::string TypeMeta::GenerateFullName() const {
+std::string TypeMeta::GenerateNsName() const {
   std::string rst;
   for (const auto& ns : namespaces) {
     rst += ns;
@@ -60,6 +60,12 @@ std::string TypeMeta::GenerateFullName() const {
   }
 
   rst += name;
+
+  return rst;
+}
+
+std::string TypeMeta::GenerateFullName() const {
+  std::string rst = GenerateNsName();
 
   if (!IsTemplateType())
     return rst;
@@ -145,7 +151,7 @@ void Field::Clear() {
   qualifiers.clear();
 }
 
-bool Field::IsStaticConstexpr() const {
+bool Field::IsStaticConstexprVariable() const {
   bool containsStatic = false;
   bool containsConstexpr = false;
   for (const auto& declSpecifier : declSpecifiers) {
@@ -154,7 +160,7 @@ bool Field::IsStaticConstexpr() const {
     else if (declSpecifier == "constexpr")
       containsConstexpr = true;
   }
-  return containsStatic && containsConstexpr;
+  return mode == Mode::Variable && containsStatic && containsConstexpr;
 }
 
 std::string Field::GenerateFieldType() const {
@@ -239,6 +245,83 @@ bool Field::IsMemberFunction() const {
   return !containsStatic;
 }
 
+std::string Field::GenerateParamTypeList() const {
+  return GenerateParamTypeList(parameters.size());
+}
+
+std::string Field::GenerateParamTypeList(size_t num) const {
+  assert(num <= parameters.size());
+  std::string rst;
+  for (size_t i = 0; i < num; i++) {
+    rst += parameters[i].GenerateTypeName();
+    if (i != num - 1)
+      rst += ", ";
+  }
+  return rst;
+}
+
+size_t Field::GetDefaultParameterNum() const {
+  if (mode != Mode::Function)
+    return 0;
+  for (size_t i = 0; i < parameters.size(); i++) {
+    if (!parameters[i].initializer.empty())
+      return parameters.size() - i;
+  }
+  return 0;
+}
+
+std::string Field::GenerateNamedParameterList(size_t num) const {
+  assert(num <= parameters.size());
+  std::string rst;
+  size_t idx = 0;
+  for (size_t i = 0; i < num; i++) {
+    rst += parameters[i].GenerateTypeName();
+    if (parameters[i].isPacked)
+      rst += "...";
+    rst += " ";
+    if (name.empty())
+      rst += "_" + std::to_string(idx);
+    else
+      rst += parameters[i].name;
+    if (i != num - 1)
+      rst += ", ";
+  }
+  return rst;
+}
+
+std::string Field::GenerateForwardArgumentList(size_t num) const {
+  assert(num <= parameters.size());
+  std::string rst;
+  size_t idx = 0;
+  for (size_t i = 0; i < num; i++) {
+    rst += "std::forward<";
+    rst += parameters[i].GenerateTypeName();
+    rst += ">(";
+    if (name.empty()) {
+      std::string name = "_" + std::to_string(idx);
+      idx++;
+      rst += name;
+    } else
+      rst += parameters[i].name;
+    rst += ")";
+    if (parameters[i].isPacked)
+      rst += "...";
+    if (i != num - 1)
+      rst += ", ";
+  }
+  return rst;
+}
+
+std::string Field::GenerateQualifiers() const {
+  std::string rst;
+  for (size_t i = 0; i < qualifiers.size(); i++) {
+    rst += qualifiers[i];
+    if (i != qualifiers.size() - 1)
+      rst += " ";
+  }
+  return rst;
+}
+
 std::string Field::GenerateFunctionType(std::string_view obj) const {
   assert(mode == Mode::Function);
 
@@ -250,11 +333,7 @@ std::string Field::GenerateFunctionType(std::string_view obj) const {
     rst += "::*)";
   }
   rst += "(";
-  for (size_t i = 0; i < parameters.size(); i++) {
-    rst += parameters[i].GenerateTypeName();
-    if (i != parameters.size() - 1)
-      rst += ", ";
-  }
+  rst += GenerateParamTypeList();
   rst += ")";
   for (size_t i = 0; i < qualifiers.size(); i++) {
     rst += qualifiers[i];
@@ -276,4 +355,12 @@ bool TypeMeta::IsOverloaded(std::string_view name) const {
       cnt++;
   }
   return cnt > 1;
+}
+
+bool TypeMeta::HaveAnyPublicField() const {
+  for (const auto& field : fields) {
+    if (field.accessSpecifier == AccessSpecifier::PUBLIC)
+      return true;
+  }
+  return false;
 }

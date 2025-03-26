@@ -5,8 +5,10 @@ template <typename T>  // template
 struct [[size(sizeof(T))]] /*compile-time attr*/ Vec {
   // default constructor
   Vec() : x{0.f}, y{0.f} {}
+
   // overload constructor
   Vec(T x, T y) : x{x}, y{y} {}
+
   // destructor
   ~Vec() {}
 
@@ -19,8 +21,9 @@ struct [[size(sizeof(T))]] /*compile-time attr*/ Vec {
 
   // non-static member function
   float Sum() const { return x + y; }
+
   // overload function, default value
-  float Sum(float z = 1.f) const { return x + y + z; }
+  float Sum(float z, float o = 1.f) const { return x + y + z + o; }
 
   // static member function
   static T Dot(const Vec& lhs, const Vec& rhs) {

@@ -47,6 +47,7 @@ struct Field {
     Value  // enum, static constepxr
   };
   Mode mode{Mode::Variable};
+  AccessSpecifier accessSpecifier{AccessSpecifier::PRIVATE};
   std::vector<Attr> attrs;
   std::vector<DeclSpecifier> declSpecifiers;
   std::vector<std::string> pointerOperators;  // *, &, &&
@@ -57,15 +58,25 @@ struct Field {
   bool isTemplate{false};
 
   void Clear();
-  bool IsStaticConstexpr() const;
+  bool IsStaticConstexprVariable() const;
   // declSpecifiers + pointerOperators
   std::string GenerateFieldType() const;
   // typeSpecifier + pointerOperators
   std::string GenerateSimpleFieldType() const;
   // Mode::Function && contains 'static'
   bool IsMemberFunction() const;
+  // arg_type0, arg_type1, ..., arg_typeN
+  std::string GenerateParamTypeList() const;
+  // arg_type0, arg_type1, ..., arg_type(num-1)
+  std::string GenerateParamTypeList(size_t num) const;
   std::string GenerateFunctionType(std::string_view obj) const;
   std::string GenerateInitFunction() const;
+  size_t GetDefaultParameterNum() const;
+  // arg_type0 arg_name0, arg_type1 arg_name1, ..., arg_type(num-1) arg_name(num-1)
+  std::string GenerateNamedParameterList(size_t num) const;
+  // std::forward<arg_type0>(arg_name0), std::forward<arg_type0>(arg_name1), ..., std::forward<arg_type0>(arg_name(num-1))
+  std::string GenerateForwardArgumentList(size_t num) const;
+  std::string GenerateQualifiers() const;
 };
 
 struct Base {
@@ -91,11 +102,14 @@ struct TypeMeta {
 
   bool IsTemplateType() const noexcept { return !templateParameters.empty(); }
 
+  // namespaces + name
+  std::string GenerateNsName() const;
   // namespaces + name + template
   std::string GenerateFullName() const;
   // templateParameter_0, templateParameter_1, ...,  templateParameter_N
   std::string GenerateTemplateList() const;
   std::vector<size_t> GetPublicBaseIndices() const;
   bool IsOverloaded(std::string_view name) const;
+  bool HaveAnyPublicField() const;
 };
 }  // namespace My::MySRefl

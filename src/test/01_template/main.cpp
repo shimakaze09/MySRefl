@@ -18,11 +18,14 @@ struct [[size(8)]] Point {
 };
 
 template <typename T>
-struct My::MySRefl::TypeInfo<Point<T>> : My::MySRefl::TypeInfoBase<Point<T>> {
+struct My::MySRefl::TypeInfo<Point<T>> : TypeInfoBase<Point<T>> {
+#ifdef MY_MYSREFL_NOT_USE_NAMEOF
+  // [!] all instance types have the same name
+  static constexpr char name[6] = "Point";
+#endif
   static constexpr AttrList attrs = {
       Attr{"size", 8},
   };
-
   static constexpr FieldList fields = {
       Field{"x", &Point<T>::x,
             AttrList{
@@ -41,9 +44,9 @@ int main() {
   TypeInfo<Point<float>>::fields.ForEach([](auto field) {
     cout << field.name << endl;
     field.attrs.ForEach([](auto attr) {
-      cout << "name: " << attr.name << endl;
+      cout << "name  : " << attr.name << endl;
       if constexpr (attr.has_value)
-        cout << "value: " << attr.value << endl;
+        cout << "value : " << attr.value << endl;
     });
   });
 
@@ -54,9 +57,9 @@ int main() {
   static_assert(TypeInfo<Point<float>>::fields.Contains("x"));
 
   TypeInfo<Point<float>>::attrs.ForEach([](auto attr) {
-    cout << "name: " << attr.name << endl;
+    cout << "name  : " << attr.name << endl;
     if constexpr (attr.has_value)
-      cout << "value: " << attr.value << endl;
+      cout << "value : " << attr.value << endl;
   });
 
   TypeInfo<Point<float>>::ForEachVarOf(p, [](auto field, auto&& var) {

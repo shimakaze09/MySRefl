@@ -25,29 +25,25 @@ struct [[size(8)]] Point {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<Point> : My::MySRefl::TypeInfoBase<Point> {
+struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
+#ifdef MY_MYSREFL_NOT_USE_NAMEOF
+  static constexpr char name[6] = "Point";
+#endif
   static constexpr AttrList attrs = {
       Attr{"size", 8},
   };
-
   static constexpr FieldList fields = {
-      Field{"x", &Point::x,
+      Field{"x", &Type::x,
             AttrList{
                 Attr{"not_serialize"},
             }},
-      Field{"y", &Point::y,
+      Field{"y", &Type::y,
             AttrList{
                 Attr{"info", "hello"},
             }},
-      Field{"id", &Point::id},
-      Field{"Sum", static_cast<float (Point::*)() const>(&Point::Sum)},
-      Field{"Sum", static_cast<float (Point::*)(float) const>(&Point::Sum),
-            AttrList{
-                Attr{"__arg_0",
-                     AttrList{
-                         Attr{"__name", "z"},
-                     }},
-            }},
+      Field{"Sum", static_cast<float (Type::*)() const>(&Type::Sum)},
+      Field{"Sum", static_cast<float (Type::*)(float) const>(&Type::Sum)},
+      Field{"id", Type::id},
   };
 };
 
