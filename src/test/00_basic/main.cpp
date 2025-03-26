@@ -14,7 +14,7 @@ struct Point {
 };
 
 template <>
-struct TypeInfo<Point> : TypeInfoBase<Point> {
+struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
 #ifdef MY_MYSREFL_NOT_USE_NAMEOF
   static constexpr char name[6] = "Point";
 #endif
@@ -27,7 +27,7 @@ struct TypeInfo<Point> : TypeInfoBase<Point> {
 
 int main() {
   Point p{1.f, 2.f};
-  My::MySRefl::TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
+  TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
     cout << field.name << ": " << var << endl;
   });
 }
