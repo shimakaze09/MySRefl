@@ -60,17 +60,6 @@ struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A, true>> {
   };
 };
 
-template <>
-struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-  static constexpr char name[2] = "D";
-#endif
-  static constexpr AttrList attrs = {};
-  static constexpr FieldList fields = {
-      Field{MYSTR("d"), &Type::d},
-  };
-};
-
 int main() {
   cout << "// not fully support in MSVC++ 19.26 because of a bug (2020/07/17)"
        << endl;

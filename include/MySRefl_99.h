@@ -11,7 +11,7 @@
   My::MySRefl::detail::MySTRImpl1([] {        \
     struct tmp {                              \
       static constexpr decltype(auto) get() { \
-        return s;                             \
+        return (s);                             \
       }                                       \
     };                                        \
     return tmp{};                             \
