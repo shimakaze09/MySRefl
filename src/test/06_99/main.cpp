@@ -27,19 +27,19 @@ template <>
 struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr char name[6] = "Point";
   static constexpr AttrList attrs = {
-      Attr{MYSTR("size"), 8},
+      Attr{TSTR("size"), 8},
   };
   static constexpr FieldList fields = {
-      Field{MYSTR("x"), &Type::x,
+      Field{TSTR("x"), &Type::x,
             AttrList{
-                Attr{MYSTR("not_serialize")},
+                Attr{TSTR("not_serialize")},
             }},
-      Field{MYSTR("y"), &Type::y,
+      Field{TSTR("y"), &Type::y,
             AttrList{
-                Attr{MYSTR("info"), "hello"},
+                Attr{TSTR("info"), "hello"},
             }},
-      Field{MYSTR("id"), Type::id},
-      Field{MYSTR("Sum"), &Type::Sum},
+      Field{TSTR("id"), Type::id},
+      Field{TSTR("Sum"), &Type::Sum},
   };
 };
 
@@ -60,10 +60,10 @@ void test_basic() {
     });
   });
 
-  constexpr auto y_field = TypeInfo<Point>::fields.Find(MYSTR("y"));
+  constexpr auto y_field = TypeInfo<Point>::fields.Find(TSTR("y"));
   static_assert(y_field.name == "y");
 
-  static_assert(TypeInfo<Point>::fields.Contains(MYSTR("x")));
+  static_assert(TypeInfo<Point>::fields.Contains(TSTR("x")));
 
   TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
     cout << field.name << " : " << var << endl;
@@ -100,9 +100,9 @@ struct My::MySRefl::TypeInfo<Data<T>> : TypeInfoBase<Data<T>> {
   static constexpr char name[5] = "Data";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("value"), &Data<T>::value,
+      Field{TSTR("value"), &Data<T>::value,
             AttrList{
-                Attr{MYSTR("range"),
+                Attr{TSTR("range"),
                      std::pair<T, T>{static_cast<T>(0), static_cast<T>(100)}},
             }},
   };
@@ -115,8 +115,8 @@ void test_template() {
 
   cout << TypeInfo<Data<float>>::name << endl;
   constexpr auto valueAttrs =
-      TypeInfo<Data<float>>::fields.Find(MYSTR("value")).attrs;
-  constexpr auto range = valueAttrs.Find(MYSTR("range")).value;
+      TypeInfo<Data<float>>::fields.Find(TSTR("value")).attrs;
+  constexpr auto range = valueAttrs.Find(TSTR("range")).value;
   constexpr float range_min = range.first;
   constexpr float range_max = range.second;
   cout << "range min :" << range_min << endl;
@@ -147,7 +147,7 @@ struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
   static constexpr char name[2] = "A";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("a"), &Type::a},
+      Field{TSTR("a"), &Type::a},
   };
 };
 
@@ -156,7 +156,7 @@ struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
   static constexpr char name[2] = "B";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("b"), &Type::b},
+      Field{TSTR("b"), &Type::b},
   };
 };
 
@@ -165,7 +165,7 @@ struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
   static constexpr char name[2] = "C";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("c"), &Type::c},
+      Field{TSTR("c"), &Type::c},
   };
 };
 
@@ -174,7 +174,7 @@ struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
   static constexpr char name[2] = "D";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("d"), &Type::d},
+      Field{TSTR("d"), &Type::d},
   };
 };
 
@@ -232,21 +232,21 @@ template <>
 struct My::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
   static constexpr char name[6] = "Color";
   static constexpr AttrList attrs = {
-      Attr{MYSTR("enum_attr"), "enum_attr_value"},
+      Attr{TSTR("enum_attr"), "enum_attr_value"},
   };
   static constexpr FieldList fields = {
-      Field{MYSTR("RED"), Type::RED,
+      Field{TSTR("RED"), Type::RED,
             AttrList{
-                Attr{MYSTR("enumerator_attr"), "enumerator_attr_value"},
-                Attr{MYSTR("func"), &Func<1>},
+                Attr{TSTR("enumerator_attr"), "enumerator_attr_value"},
+                Attr{TSTR("func"), &Func<1>},
             }},
-      Field{MYSTR("GREEN"), Type::GREEN,
+      Field{TSTR("GREEN"), Type::GREEN,
             AttrList{
-                Attr{MYSTR("func"), &Func<2>},
+                Attr{TSTR("func"), &Func<2>},
             }},
-      Field{MYSTR("BLUE"), Type::BLUE,
+      Field{TSTR("BLUE"), Type::BLUE,
             AttrList{
-                Attr{MYSTR("func"), &Func<3>},
+                Attr{TSTR("func"), &Func<3>},
             }},
   };
 };
@@ -285,14 +285,14 @@ void test_enum() {
   // name -> attr
   {
     // compile-time
-    static_assert(TypeInfo<Color>::fields.Find(MYSTR("GREEN"))
-                      .attrs.Find(MYSTR("func"))
+    static_assert(TypeInfo<Color>::fields.Find(TSTR("GREEN"))
+                      .attrs.Find(TSTR("func"))
                       .value() == 2);
     // runtime
     size_t rst = static_cast<size_t>(-1);
     TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
       if (field.name == nameof_red) {
-        rst = field.attrs.Find(MYSTR("func")).value();
+        rst = field.attrs.Find(TSTR("func")).value();
         return true;
       } else
         return false;
@@ -304,14 +304,14 @@ void test_enum() {
   {
     static_assert(
         MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN)
-            .attrs.Find(MYSTR("func"))
+            .attrs.Find(TSTR("func"))
             .value() == 2);
 
     // runtime
     size_t rst = static_cast<size_t>(-1);
     TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
       if (field.value == red) {
-        rst = field.attrs.Find(MYSTR("func")).value();
+        rst = field.attrs.Find(TSTR("func")).value();
         return true;
       } else
         return false;
@@ -334,10 +334,10 @@ struct My::MySRefl::TypeInfo<FuncList> : TypeInfoBase<FuncList> {
   static constexpr char name[9] = "FuncList";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("Func0"), &Type::Func0},
-      Field{MYSTR("Func1"), &Type::Func1,
+      Field{TSTR("Func0"), &Type::Func0},
+      Field{TSTR("Func1"), &Type::Func1,
             AttrList{
-                Attr{MYSTR("default_functions"), std::tuple{[](Type* __this) {
+                Attr{TSTR("default_functions"), std::tuple{[](Type* __this) {
                        return __this->Func1();
                      }}},
             }},
@@ -377,7 +377,7 @@ struct My::MySRefl::TypeInfo<VA> : TypeInfoBase<VA> {
   static constexpr char name[3] = "VA";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("a"), &Type::a},
+      Field{TSTR("a"), &Type::a},
   };
 };
 
@@ -386,7 +386,7 @@ struct My::MySRefl::TypeInfo<VB> : TypeInfoBase<VB, Base<VA, true>> {
   static constexpr char name[3] = "VB";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("b"), &Type::b},
+      Field{TSTR("b"), &Type::b},
   };
 };
 
@@ -395,7 +395,7 @@ struct My::MySRefl::TypeInfo<VC> : TypeInfoBase<VC, Base<VA, true>> {
   static constexpr char name[3] = "VC";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("c"), &Type::c},
+      Field{TSTR("c"), &Type::c},
   };
 };
 
@@ -404,7 +404,7 @@ struct My::MySRefl::TypeInfo<VD> : TypeInfoBase<VD, Base<VB>, Base<VC>> {
   static constexpr char name[3] = "VD";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("d"), &Type::d},
+      Field{TSTR("d"), &Type::d},
   };
 };
 

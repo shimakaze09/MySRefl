@@ -5,41 +5,42 @@
 #pragma once  // My Static Reflection -- 99 lines
 
 #include <string_view>  // Repository: https://github.com/shimakaze09/MySRefl
-#include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/master/LICENSE
+#include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/main/LICENSE
 
-#define MYSTR(s)                              \
-  My::MySRefl::detail::MySTRImpl1([] {        \
+#define TSTR(s)                               \
+  My::MySRefl::detail::TNameImpl1([] {       \
     struct tmp {                              \
       static constexpr decltype(auto) get() { \
-        return (s);                             \
+        return (s);                           \
       }                                       \
     };                                        \
     return tmp{};                             \
   }())
 
 namespace My::MySRefl::detail {
-template <class Char, Char... chars>
-struct Str {
-  using Tag = Str;
+template <class C, C... cs>
+struct TStr {
+  using Tag = TStr;
 
   template <class T>
   static constexpr bool NameIs() {
     return std::is_same_v<T, Tag>;
   }
 
-  static constexpr char name_data[]{chars..., Char(0)};
+  using Char = C;
+  static constexpr char name_data[]{cs..., C(0)};
   static constexpr std::string_view name{name_data};
 };
 
 template <class Char, class T, size_t... N>
-constexpr auto MySTRImpl2(std::index_sequence<N...>) {
-  return Str<Char, T::get()[N]...>();
+constexpr auto TNameImpl2(std::index_sequence<N...>) {
+  return TStr<Char, T::get()[N]...>();
 }
 
 template <typename T>
-constexpr auto MySTRImpl1(T) {
+constexpr auto TNameImpl1(T) {
   using Char = std::decay_t<decltype(T::get()[0])>;
-  return MySTRImpl2<Char, T>(
+  return TNameImpl2<Char, T>(
       std::make_index_sequence<sizeof(T::get()) / sizeof(Char) - 1>());
 }
 
@@ -105,8 +106,8 @@ constexpr void NV_Var(TI info, U&& u, F&& f) {
 }  // namespace My::MySRefl::detail
 
 namespace My::MySRefl {
-template <class T, class STR>
-struct NamedValue : STR {
+template <class Name, class T>
+struct NamedValue : Name {
   T value;
   static constexpr bool has_value = true;
 
@@ -121,8 +122,8 @@ struct NamedValue : STR {
   }
 };
 
-template <class STR>
-struct NamedValue<void, STR> : STR { /*T value;*/
+template <class Name>
+struct NamedValue<Name, void> : Name { /*T value;*/
   static constexpr bool has_value = false;
 
   template <class U>
@@ -218,14 +219,14 @@ struct ElemList {
   list.Get<list.FindValue(value)>()
 };
 
-template <class T, class STR>
-struct Attr : NamedValue<T, STR> {
-  constexpr Attr(STR, T v) : NamedValue<T, STR>{v} {}
+template <class Name, class T>
+struct Attr : NamedValue<Name, T> {
+  constexpr Attr(Name, T v) : NamedValue<Name, T>{v} {}
 };
 
-template <class STR>
-struct Attr<void, STR> : NamedValue<void, STR> {
-  constexpr Attr(STR) {}
+template <class Name>
+struct Attr<Name, void> : NamedValue<Name, void> {
+  constexpr Attr(Name) {}
 };
 
 template <typename... As>
@@ -247,11 +248,12 @@ struct FTraits<T U::*> : FTraitsB<false, std::is_function_v<T>> {};
 template <class T>
 struct FTraits<T*> : FTraitsB<true, std::is_function_v<T>> {};  // static member
 
-template <class T, class AList, class STR>
-struct Field : FTraits<T>, NamedValue<T, STR> {
+template <class Name, class T, class AList>
+struct Field : FTraits<T>, NamedValue<Name, T> {
   AList attrs;
 
-  constexpr Field(STR, T v, AList as = {}) : NamedValue<T, STR>{v}, attrs{as} {}
+  constexpr Field(Name, T v, AList as = {})
+      : NamedValue<Name, T>{v}, attrs{as} {}
 };
 
 template <typename... Fs>
@@ -336,12 +338,12 @@ struct TypeInfoBase {
                    std::forward<Func>(func));
   }
 };
-template <size_t N, class STR>
-Attr(STR, const char (&)[N]) -> Attr<std::string_view, STR>;
-template <class STR>
-Attr(STR) -> Attr<void, STR>;
-template <class T, class AList, class STR>
-Field(STR, T, AList) -> Field<T, AList, STR>;
-template <class T, class STR>
-Field(STR, T) -> Field<T, AttrList<>, STR>;
+template <class Name, class Char, size_t N>
+Attr(Name, const Char (&)[N]) -> Attr<Name, std::basic_string_view<Char>>;
+template <class Name>
+Attr(Name) -> Attr<Name, void>;
+template <class Name, class T, class AList>
+Field(Name, T, AList) -> Field<Name, T, AList>;
+template <class Name, class T>
+Field(Name, T) -> Field<Name, T, AttrList<>>;
 }  // namespace My::MySRefl

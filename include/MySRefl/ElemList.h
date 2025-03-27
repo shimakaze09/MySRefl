@@ -26,8 +26,8 @@ struct ElemList {
   template <typename Func>
   constexpr size_t FindIf(Func&& func) const;
 
-  template <typename Char, Char... chars>
-  constexpr auto Find(std::integer_sequence<Char, chars...> name) const;
+  template <typename Name>
+  constexpr auto Find(Name = {}) const;
 
   template <typename T>
   constexpr size_t FindValue(T value) const;
@@ -48,8 +48,8 @@ struct ElemList {
   template <typename T, typename Char = char>
   constexpr std::basic_string_view<Char> NameOfValue(T value) const;
 
-  template <typename Char, Char... chars>
-  constexpr bool Contains(std::integer_sequence<Char, chars...> name) const;
+  template <typename Name>
+  constexpr bool Contains(Name) const;
 
   template <size_t N>
   constexpr auto Get() const;

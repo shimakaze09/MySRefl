@@ -28,21 +28,21 @@ struct My::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
   static constexpr char name[6] = "Color";
 #endif
   static constexpr AttrList attrs = {
-      Attr{MYSTR("enum_attr"), "enum_attr_value"},
+      Attr{TSTR("enum_attr"), "enum_attr_value"},
   };
   static constexpr FieldList fields = {
-      Field{MYSTR("RED"), Type::RED,
+      Field{TSTR("RED"), Type::RED,
             AttrList{
-                Attr{MYSTR("enumerator_attr"), "enumerator_attr_value"},
-                Attr{MYSTR("func"), &Func<1>},
+                Attr{TSTR("enumerator_attr"), "enumerator_attr_value"},
+                Attr{TSTR("func"), &Func<1>},
             }},
-      Field{MYSTR("GREEN"), Type::GREEN,
+      Field{TSTR("GREEN"), Type::GREEN,
             AttrList{
-                Attr{MYSTR("func"), &Func<2>},
+                Attr{TSTR("func"), &Func<2>},
             }},
-      Field{MYSTR("BLUE"), Type::BLUE,
+      Field{TSTR("BLUE"), Type::BLUE,
             AttrList{
-                Attr{MYSTR("func"), &Func<3>},
+                Attr{TSTR("func"), &Func<3>},
             }},
   };
 };
@@ -78,14 +78,14 @@ int main() {
   // name -> attr
   {
     // compile-time
-    static_assert(TypeInfo<Color>::fields.Find(MYSTR("GREEN"))
-                      .attrs.Find(MYSTR("func"))
+    static_assert(TypeInfo<Color>::fields.Find(TSTR("GREEN"))
+                      .attrs.Find(TSTR("func"))
                       .value() == 2);
     // runtime
     size_t rst = static_cast<size_t>(-1);
     TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
       if (field.name == nameof_red) {
-        rst = field.attrs.Find(MYSTR("func")).value();
+        rst = field.attrs.Find(TSTR("func")).value();
         return true;
       } else
         return false;
@@ -97,14 +97,14 @@ int main() {
   {
     static_assert(
         MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN)
-            .attrs.Find(MYSTR("func"))
+            .attrs.Find(TSTR("func"))
             .value() == 2);
 
     // runtime
     size_t rst = static_cast<size_t>(-1);
     TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
       if (field.value == red) {
-        rst = field.attrs.Find(MYSTR("func")).value();
+        rst = field.attrs.Find(TSTR("func")).value();
         return true;
       } else
         return false;

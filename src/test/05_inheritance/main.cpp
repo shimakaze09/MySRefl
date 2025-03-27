@@ -34,7 +34,7 @@ struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("a"), &Type::a},
+      Field{TSTR("a"), &Type::a},
   };
 };
 
@@ -45,7 +45,7 @@ struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("b"), &Type::b},
+      Field{TSTR("b"), &Type::b},
   };
 };
 
@@ -56,7 +56,7 @@ struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("c"), &Type::c},
+      Field{TSTR("c"), &Type::c},
   };
 };
 
@@ -67,7 +67,7 @@ struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 #endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{MYSTR("d"), &Type::d},
+      Field{TSTR("d"), &Type::d},
   };
 };
 

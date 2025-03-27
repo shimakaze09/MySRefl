@@ -76,14 +76,13 @@ constexpr size_t ElemList<Elems...>::FindIf(Func&& func) const {
 }
 
 template <typename... Elems>
-template <typename Char, Char... chars>
-constexpr auto ElemList<Elems...>::Find(
-    std::integer_sequence<Char, chars...>) const {
+template <typename Name>
+constexpr auto ElemList<Elems...>::Find(Name) const {
   return Accumulate(nullptr, [](auto acc, auto ele) {
+    using Elem = std::decay_t<decltype(ele)>;
     if constexpr (!std::is_same_v<std::decay_t<decltype(acc)>, nullptr_t>)
       return acc;
-    else if constexpr (std::is_same_v<typename decltype(ele)::Tag,
-                                      std::integer_sequence<Char, chars...>>)
+    else if constexpr (Elem::template NameIs<Name>())
       return ele;
     else
       return acc;
@@ -103,7 +102,7 @@ constexpr T ElemList<Elems...>::ValueOfName(
   T value{};
   FindIf([name, &value](auto ele) {
     using Elem = std::decay_t<decltype(ele)>;
-    if constexpr (std::is_same_v<typename Elem::Tag::value_type, Char> &&
+    if constexpr (std::is_same_v<typename Elem::Tag::Char, Char> &&
                   Elem::template ValueTypeIs<T>()) {
       if (ele.name == name) {
         value = ele.value;
@@ -136,12 +135,11 @@ constexpr std::basic_string_view<Char> ElemList<Elems...>::NameOfValue(
 }
 
 template <typename... Elems>
-template <typename Char, Char... chars>
-constexpr bool ElemList<Elems...>::Contains(
-    std::integer_sequence<Char, chars...> name) const {
+template <typename Name>
+constexpr bool ElemList<Elems...>::Contains(Name) const {
   return static_cast<size_t>(-1) != FindIf([](auto ele) {
-           if constexpr (std::is_same_v<typename decltype(ele)::Tag,
-                                        std::integer_sequence<Char, chars...>>)
+           using Elem = std::decay_t<decltype(ele)>;
+           if constexpr (Elem::template NameIs<Name>())
              return true;
            else
              return false;
