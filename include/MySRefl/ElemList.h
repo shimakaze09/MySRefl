@@ -49,7 +49,7 @@ struct ElemList {
   constexpr std::basic_string_view<Char> NameOfValue(T value) const;
 
   template <typename Name>
-  constexpr bool Contains(Name) const;
+  static constexpr bool Contains(Name = {});
 
   template <size_t N>
   constexpr auto Get() const;

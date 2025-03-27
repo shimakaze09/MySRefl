@@ -23,7 +23,7 @@ struct TStr {
   using Tag = TStr;
 
   template <class T>
-  static constexpr bool NameIs() {
+  static constexpr bool NameIs(T = {}) {
     return std::is_same_v<T, Tag>;
   }
 
@@ -161,7 +161,7 @@ struct ElemList {
   }
 
   template <class S>
-  constexpr auto Find(S) const {
+  constexpr auto Find(S = {}) const {
     return Accumulate(0, [](auto r, auto e) {
       if constexpr (decltype(e)::template NameIs<S>())
         return e;
@@ -176,8 +176,8 @@ struct ElemList {
   }
 
   template <class S>
-  constexpr bool Contains(S) const {
-    return !std::is_same_v<int, decltype(Find(S{}))>;
+  static constexpr bool Contains(S = {}) {
+    return (Es::template NameIs<S>() || ...);
   }
 
   template <typename T, typename S>
