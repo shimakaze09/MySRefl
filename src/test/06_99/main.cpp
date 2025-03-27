@@ -4,6 +4,7 @@
 
 #include <MySRefl_99.h>
 #include <array>
+#include <cassert>
 #include <iostream>
 
 using namespace std;
@@ -23,15 +24,23 @@ struct [[size(8)]] Point {
 };
 
 template <>
-struct TypeInfo<Point> : TypeInfoBase<Point> {
-  static constexpr std::string_view name = "Point";
-
+struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
+  static constexpr char name[6] = "Point";
+  static constexpr AttrList attrs = {
+      Attr{MYSTR("size"), 8},
+  };
   static constexpr FieldList fields = {
-      Field{"x", &Point::x, AttrList{Attr{"not_serialize"}}},
-      Field{"y", &Point::y, AttrList{Attr{"info", "hello"}}},
-      Field{"id", &Point::id}, Field{"Sum", &Point::Sum}};
-
-  static constexpr AttrList attrs = {Attr{"size", 8}};
+      Field{MYSTR("x"), &Type::x,
+            AttrList{
+                Attr{MYSTR("not_serialize")},
+            }},
+      Field{MYSTR("y"), &Type::y,
+            AttrList{
+                Attr{MYSTR("info"), "hello"},
+            }},
+      Field{MYSTR("id"), Type::id},
+      Field{MYSTR("Sum"), &Type::Sum},
+  };
 };
 
 void test_basic() {
@@ -51,11 +60,10 @@ void test_basic() {
     });
   });
 
-  constexpr auto y_field =
-      MySRefl_ElemList_GetByName(TypeInfo<Point>::fields, "y");
+  constexpr auto y_field = TypeInfo<Point>::fields.Find(MYSTR("y"));
   static_assert(y_field.name == "y");
 
-  static_assert(TypeInfo<Point>::fields.Contains("x"));
+  static_assert(TypeInfo<Point>::fields.Contains(MYSTR("x")));
 
   TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
     cout << field.name << " : " << var << endl;
@@ -63,7 +71,7 @@ void test_basic() {
 
   TypeInfo<Point>::fields.ForEach([](auto field) {
     if constexpr (field.is_static)
-      cout << field.name << ": " << *field.value << endl;
+      cout << field.name << ": " << field.value << endl;
   });
 
   TypeInfo<Point>::fields.ForEach([p](auto field) {
@@ -73,6 +81,8 @@ void test_basic() {
       cout << (p.*(field.value))() << endl;
     }
   });
+  static_assert(TypeInfo<Point>::fields.NameOfValue(Point::id) == "id");
+  static_assert(TypeInfo<Point>::fields.ValueOfName<size_t>("id") == Point::id);
 }
 
 // ==============
@@ -85,13 +95,17 @@ struct Data {
 };
 
 template <typename T>
-struct TypeInfo<Data<T>> : TypeInfoBase<Data<T>> {
-  static constexpr std::string_view name = "Data";  // use nameof
-
-  static constexpr FieldList fields = {Field{
-      "value", &Data<T>::value,
-      AttrList{Attr{"range",
-                    std::pair<T, T>{static_cast<T>(0), static_cast<T>(100)}}}}};
+struct My::MySRefl::TypeInfo<Data<T>> : TypeInfoBase<Data<T>> {
+  // [!] all instance types have the same name
+  static constexpr char name[5] = "Data";
+  static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("value"), &Data<T>::value,
+            AttrList{
+                Attr{MYSTR("range"),
+                     std::pair<T, T>{static_cast<T>(0), static_cast<T>(100)}},
+            }},
+  };
 };
 
 void test_template() {
@@ -101,8 +115,8 @@ void test_template() {
 
   cout << TypeInfo<Data<float>>::name << endl;
   constexpr auto valueAttrs =
-      MySRefl_ElemList_GetByName(TypeInfo<Data<float>>::fields, "value").attrs;
-  constexpr auto range = MySRefl_ElemList_GetByName(valueAttrs, "range").value;
+      TypeInfo<Data<float>>::fields.Find(MYSTR("value")).attrs;
+  constexpr auto range = valueAttrs.Find(MYSTR("range")).value;
   constexpr float range_min = range.first;
   constexpr float range_max = range.second;
   cout << "range min :" << range_min << endl;
@@ -129,39 +143,39 @@ struct D : B, C {
 };
 
 template <>
-struct TypeInfo<A> : TypeInfoBase<A> {
-  static constexpr std::string_view name = "A";
-
-  static constexpr FieldList fields = {Field{"a", &A::a}};
-
+struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
+  static constexpr char name[2] = "A";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("a"), &Type::a},
+  };
 };
 
 template <>
-struct TypeInfo<B> : TypeInfoBase<B, Base<A>> {
-  static constexpr std::string_view name = "B";
-
-  static constexpr FieldList fields = {Field{"b", &B::b}};
-
+struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
+  static constexpr char name[2] = "B";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("b"), &Type::b},
+  };
 };
 
 template <>
-struct TypeInfo<C> : TypeInfoBase<C, Base<A>> {
-  static constexpr std::string_view name = "C";
-
-  static constexpr FieldList fields = FieldList{Field{"c", &C::c}};
-
+struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
+  static constexpr char name[2] = "C";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("c"), &Type::c},
+  };
 };
 
 template <>
-struct TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
-  static constexpr std::string_view name = "D";
-
-  static constexpr FieldList fields = FieldList{Field{"d", &D::d}};
-
+struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
+  static constexpr char name[2] = "D";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("d"), &Type::d},
+  };
 };
 
 void test_inheritance() {
@@ -215,37 +229,95 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 };
 
 template <>
-struct TypeInfo<Color> : TypeInfoBase<Color> {
-  static constexpr std::string_view name = "Color";
-
+struct My::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
+  static constexpr char name[6] = "Color";
+  static constexpr AttrList attrs = {
+      Attr{MYSTR("enum_attr"), "enum_attr_value"},
+  };
   static constexpr FieldList fields = {
-      Field{"RED", Color::RED,
-            AttrList{Attr{"enumerator_attr", "enumerator_attr_value"},
-                     Attr{"func", &Func<1>}}},
-      Field{"GREEN", Color::GREEN, AttrList{Attr{"func", &Func<2>}}},
-      Field{"BLUE", Color::BLUE, AttrList{Attr{"func", &Func<3>}}}};
-
-  static constexpr AttrList attrs = {Attr{"enum_attr", "enum_attr_value"}};
+      Field{MYSTR("RED"), Type::RED,
+            AttrList{
+                Attr{MYSTR("enumerator_attr"), "enumerator_attr_value"},
+                Attr{MYSTR("func"), &Func<1>},
+            }},
+      Field{MYSTR("GREEN"), Type::GREEN,
+            AttrList{
+                Attr{MYSTR("func"), &Func<2>},
+            }},
+      Field{MYSTR("BLUE"), Type::BLUE,
+            AttrList{
+                Attr{MYSTR("func"), &Func<3>},
+            }},
+  };
 };
 
 void test_enum() {
   cout << "====================" << endl
        << " enum" << endl
        << "====================" << endl;
+  cout << TypeInfo<Color>::name << endl;
 
   TypeInfo<Color>::fields.ForEach(
       [](auto field) { cout << field.name << endl; });
-  static_assert(
-      MySRefl_ElemList_GetByName(TypeInfo<Color>::fields, "RED").value ==
-      Color::RED);
-  static_assert(
-      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::RED).name ==
-      "RED");
 
-  constexpr Color c = Color::GREEN;
-  constexpr auto c_attr =
-      MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, c).attrs;
-  static_assert(MySRefl_ElemList_GetByName(c_attr, "func").value() == 2);
+  Color red = Color::RED;
+  std::string_view nameof_red = "RED";
+
+  // name -> value
+  {
+    // compile-time
+    static_assert(TypeInfo<Color>::fields.ValueOfName<Color>("GREEN") ==
+                  Color::GREEN);
+
+    // runtime
+    assert(TypeInfo<Color>::fields.ValueOfName<Color>(nameof_red) == red);
+  }
+
+  // value -> name
+  {
+    // compile-time
+    static_assert(TypeInfo<Color>::fields.NameOfValue(Color::GREEN) == "GREEN");
+
+    // runtime
+    assert(TypeInfo<Color>::fields.NameOfValue(red) == nameof_red);
+  }
+
+  // name -> attr
+  {
+    // compile-time
+    static_assert(TypeInfo<Color>::fields.Find(MYSTR("GREEN"))
+                      .attrs.Find(MYSTR("func"))
+                      .value() == 2);
+    // runtime
+    size_t rst = static_cast<size_t>(-1);
+    TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
+      if (field.name == nameof_red) {
+        rst = field.attrs.Find(MYSTR("func")).value();
+        return true;
+      } else
+        return false;
+    });
+    assert(rst == 1);
+  }
+
+  // value -> attr
+  {
+    static_assert(
+        MySRefl_ElemList_GetByValue(TypeInfo<Color>::fields, Color::GREEN)
+            .attrs.Find(MYSTR("func"))
+            .value() == 2);
+
+    // runtime
+    size_t rst = static_cast<size_t>(-1);
+    TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
+      if (field.value == red) {
+        rst = field.attrs.Find(MYSTR("func")).value();
+        return true;
+      } else
+        return false;
+    });
+    assert(rst == 1);
+  }
 }
 
 // ==============
@@ -258,17 +330,18 @@ struct FuncList {
 };
 
 template <>
-struct TypeInfo<FuncList> : TypeInfoBase<FuncList> {
+struct My::MySRefl::TypeInfo<FuncList> : TypeInfoBase<FuncList> {
+  static constexpr char name[9] = "FuncList";
+  static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
-      Field{"Func0", &FuncList::Func0,
-            AttrList{Attr{"argument_list",
-                          AttrList{
-                              Attr{"@0", NamedValue<void>{"a"}},
-                              Attr{"@1", NamedValue<void>{"b"}},
-                          }}}},
-      Field{"Func1", &FuncList::Func1,
-            AttrList{Attr{"argument_list",
-                          AttrList{Attr{"@0", NamedValue<int>{"x", 1}}}}}}};
+      Field{MYSTR("Func0"), &Type::Func0},
+      Field{MYSTR("Func1"), &Type::Func1,
+            AttrList{
+                Attr{MYSTR("default_functions"), std::tuple{[](Type* __this) {
+                       return __this->Func1();
+                     }}},
+            }},
+  };
 };
 
 void test_function() {
@@ -276,29 +349,8 @@ void test_function() {
        << " function" << endl
        << "====================" << endl;
 
-  constexpr auto f0 =
-      MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func0");
-  cout << f0.name << endl;
-  constexpr auto f0_args =
-      MySRefl_ElemList_GetByName(f0.attrs, "argument_list");
-  f0_args.value.ForEach([](auto arg) {
-    cout << arg.name << ": " << arg.value.name;
-    if constexpr (arg.value.has_value)
-      cout << " = " << arg.value.value;
-    cout << endl;
-  });
-
-  constexpr auto f1 =
-      MySRefl_ElemList_GetByName(TypeInfo<FuncList>::fields, "Func1");
-  cout << f1.name << endl;
-  constexpr auto f1_args =
-      MySRefl_ElemList_GetByName(f1.attrs, "argument_list");
-  f1_args.value.ForEach([](auto arg) {
-    cout << arg.name << ": " << arg.value.name;
-    if constexpr (arg.value.has_value)
-      cout << " = " << arg.value.value;
-    cout << endl;
-  });
+  TypeInfo<FuncList>::fields.ForEach(
+      [](auto field) { cout << field.name << endl; });
 }
 
 // ==============
@@ -321,39 +373,39 @@ struct VD : VB, VC {
 };
 
 template <>
-struct TypeInfo<VA> : TypeInfoBase<VA> {
-  static constexpr std::string_view name = "VA";
-
-  static constexpr FieldList fields = FieldList{Field{"a", &VA::a}};
-
+struct My::MySRefl::TypeInfo<VA> : TypeInfoBase<VA> {
+  static constexpr char name[3] = "VA";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("a"), &Type::a},
+  };
 };
 
 template <>
-struct TypeInfo<VB> : TypeInfoBase<VB, Base<VA, true>> {
-  static constexpr std::string_view name = "VB";
-
-  static constexpr FieldList fields = FieldList{Field{"b", &VB::b}};
-
+struct My::MySRefl::TypeInfo<VB> : TypeInfoBase<VB, Base<VA, true>> {
+  static constexpr char name[3] = "VB";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("b"), &Type::b},
+  };
 };
 
 template <>
-struct TypeInfo<VC> : TypeInfoBase<VC, Base<VA, true>> {
-  static constexpr std::string_view name = "VC";
-
-  static constexpr FieldList fields = FieldList{Field{"c", &VC::c}};
-
+struct My::MySRefl::TypeInfo<VC> : TypeInfoBase<VC, Base<VA, true>> {
+  static constexpr char name[3] = "VC";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("c"), &Type::c},
+  };
 };
 
 template <>
-struct TypeInfo<VD> : TypeInfoBase<VD, Base<VB>, Base<VC>> {
-  static constexpr std::string_view name = "VD";
-
-  static constexpr FieldList fields = FieldList{Field{"d", &VD::d}};
-
+struct My::MySRefl::TypeInfo<VD> : TypeInfoBase<VD, Base<VB>, Base<VC>> {
+  static constexpr char name[3] = "VD";
   static constexpr AttrList attrs = {};
+  static constexpr FieldList fields = {
+      Field{MYSTR("d"), &Type::d},
+  };
 };
 
 void test_virtual() {

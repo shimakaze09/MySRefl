@@ -5,9 +5,44 @@
 #pragma once  // My Static Reflection -- 99 lines
 
 #include <string_view>  // Repository: https://github.com/shimakaze09/MySRefl
-#include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/main/LICENSE
+#include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/master/LICENSE
+
+#define MYSTR(s)                              \
+  My::MySRefl::detail::MySTRImpl1([] {        \
+    struct tmp {                              \
+      static constexpr decltype(auto) get() { \
+        return s;                             \
+      }                                       \
+    };                                        \
+    return tmp{};                             \
+  }())
 
 namespace My::MySRefl::detail {
+template <class Char, Char... chars>
+struct Str {
+  using Tag = Str;
+
+  template <class T>
+  static constexpr bool NameIs() {
+    return std::is_same_v<T, Tag>;
+  }
+
+  static constexpr char name_data[]{chars..., Char(0)};
+  static constexpr std::string_view name{name_data};
+};
+
+template <class Char, class T, size_t... N>
+constexpr auto MySTRImpl2(std::index_sequence<N...>) {
+  return Str<Char, T::get()[N]...>();
+}
+
+template <typename T>
+constexpr auto MySTRImpl1(T) {
+  using Char = std::decay_t<decltype(T::get()[0])>;
+  return MySTRImpl2<Char, T>(
+      std::make_index_sequence<sizeof(T::get()) / sizeof(Char) - 1>());
+}
+
 template <class L, class F>
 constexpr size_t FindIf(L, F&&, std::index_sequence<>) {
   return -1;
@@ -70,11 +105,12 @@ constexpr void NV_Var(TI info, U&& u, F&& f) {
 }  // namespace My::MySRefl::detail
 
 namespace My::MySRefl {
-template <class T>
-struct NamedValue {  // named value
-  std::string_view name;
+template <class T, class STR>
+struct NamedValue : STR {
   T value;
   static constexpr bool has_value = true;
+
+  constexpr NamedValue(T v) : value{v} {}
 
   template <class U>
   constexpr bool operator==(U v) const {
@@ -85,9 +121,8 @@ struct NamedValue {  // named value
   }
 };
 
-template <>
-struct NamedValue<void> {
-  std::string_view name; /*T value;*/
+template <class STR>
+struct NamedValue<void, STR> : STR { /*T value;*/
   static constexpr bool has_value = false;
 
   template <class U>
@@ -97,7 +132,7 @@ struct NamedValue<void> {
 };
 
 template <typename... Es>
-struct ElemList {  // Es is a named value
+struct ElemList {
   std::tuple<Es...> elems;
   static constexpr size_t size = sizeof...(Es);
 
@@ -124,8 +159,14 @@ struct ElemList {  // Es is a named value
                           std::make_index_sequence<sizeof...(Es)>{});
   }
 
-  constexpr size_t Find(std::string_view n) const {
-    return FindIf([n](auto e) { return e.name == n; });
+  template <class S>
+  constexpr auto Find(S) const {
+    return Accumulate(0, [](auto r, auto e) {
+      if constexpr (decltype(e)::template NameIs<S>())
+        return e;
+      else
+        return r;
+    });
   }
 
   template <class T>
@@ -133,8 +174,25 @@ struct ElemList {  // Es is a named value
     return FindIf([v](auto e) { return e == v; });
   }
 
-  constexpr bool Contains(std::string_view name) const {
-    return Find(name) != static_cast<size_t>(-1);
+  template <class S>
+  constexpr bool Contains(S) const {
+    return !std::is_same_v<int, decltype(Find(S{}))>;
+  }
+
+  template <typename T, typename S>
+  constexpr T ValueOfName(S n) const {
+    return Accumulate(T{}, [n](auto r, auto e) {
+      if constexpr (std::is_same_v<decltype(e.value), T>)
+        return e.name == n ? e.value : r;
+      else
+        return r;
+    });
+  }
+
+  template <class T, class C = char>
+  constexpr auto NameOfValue(T v) const {
+    return Accumulate(std::basic_string_view<C>{},
+                      [v](auto r, auto e) { return e == v ? e.name : r; });
   }
 
   template <class E>
@@ -156,19 +214,18 @@ struct ElemList {  // Es is a named value
     return std::get<N>(elems);
   }
 
-#define MySRefl_ElemList_GetByName(list, name) list.Get<list.Find(name)>()
 #define MySRefl_ElemList_GetByValue(list, value) \
   list.Get<list.FindValue(value)>()
 };
 
-template <class T>
-struct Attr : NamedValue<T> {
-  constexpr Attr(std::string_view n, T v) : NamedValue<T>{n, v} {}
+template <class T, class STR>
+struct Attr : NamedValue<T, STR> {
+  constexpr Attr(STR, T v) : NamedValue<T, STR>{v} {}
 };
 
-template <>
-struct Attr<void> : NamedValue<void> {
-  constexpr Attr(std::string_view n) : NamedValue<void>{n} {}
+template <class STR>
+struct Attr<void, STR> : NamedValue<void, STR> {
+  constexpr Attr(STR) {}
 };
 
 template <typename... As>
@@ -190,12 +247,11 @@ struct FTraits<T U::*> : FTraitsB<false, std::is_function_v<T>> {};
 template <class T>
 struct FTraits<T*> : FTraitsB<true, std::is_function_v<T>> {};  // static member
 
-template <class T, class AList>
-struct Field : FTraits<T>, NamedValue<T> {
+template <class T, class AList, class STR>
+struct Field : FTraits<T>, NamedValue<T, STR> {
   AList attrs;
 
-  constexpr Field(std::string_view n, T v, AList as = {})
-      : NamedValue<T>{n, v}, attrs{as} {}
+  constexpr Field(STR, T v, AList as = {}) : NamedValue<T, STR>{v}, attrs{as} {}
 };
 
 template <typename... Fs>
@@ -280,12 +336,12 @@ struct TypeInfoBase {
                    std::forward<Func>(func));
   }
 };
-
-template <size_t N>
-Attr(std::string_view, const char (&)[N]) -> Attr<std::string_view>;
-Attr(std::string_view) -> Attr<void>;
-template <class T, class AList>
-Field(std::string_view, T, AList) -> Field<T, AList>;
-template <class T>
-Field(std::string_view, T) -> Field<T, AttrList<>>;
+template <size_t N, class STR>
+Attr(STR, const char (&)[N]) -> Attr<std::string_view, STR>;
+template <class STR>
+Attr(STR) -> Attr<void, STR>;
+template <class T, class AList, class STR>
+Field(STR, T, AList) -> Field<T, AList, STR>;
+template <class T, class STR>
+Field(STR, T) -> Field<T, AttrList<>, STR>;
 }  // namespace My::MySRefl

@@ -4,15 +4,16 @@
 
 #pragma once
 
-#include <string_view>
 #include "detail/NamedValue.inl"
+
+#include <string_view>
 
 // [MySRefl static C-style string]
 // std::integer_sequence<Char, chars...>
 // in C++20, we can easily put a string into template parameter list
 // but in C++17, we just can use this disgusting trick
 #define MYSTR(s)                              \
-  (My::MySRefl::detail::prepare([] {          \
+  (My::MySRefl::detail::MySTRHelper([] {       \
     struct tmp {                              \
       static constexpr decltype(auto) get() { \
         return s;                             \

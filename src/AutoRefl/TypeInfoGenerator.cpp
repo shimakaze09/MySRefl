@@ -26,7 +26,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
     const std::string nsname = typeMeta.GenerateNsName();
     const std::string tname = typeMeta.IsTemplateType() ? fullname : "Type";
     ss << "template<" << typeMeta.GenerateTemplateList() << ">" << endl
-       << "struct Ubpa::USRefl::TypeInfo<" << fullname << "> :" << endl;
+       << "struct My::MySRefl::TypeInfo<" << fullname << "> :" << endl;
 
     ss << indent << "TypeInfoBase<" << fullname;
     auto publicBaseIndice = typeMeta.GetPublicBaseIndices();
@@ -48,7 +48,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
     ss << ">" << endl << "{" << endl;
 
     // name
-    ss << "#ifdef UBPA_USREFL_NOT_USE_NAMEOF" << endl;
+    ss << "#ifdef MY_MYSREFL_NOT_USE_NAMEOF" << endl;
 
     if (typeMeta.IsTemplateType())
       ss << indent << "// [!] all instance types have the same name" << endl;
