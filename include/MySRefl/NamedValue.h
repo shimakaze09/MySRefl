@@ -28,7 +28,7 @@ struct NamedValue;
 
 template <typename T, typename Char, Char... chars>
 struct NamedValueBase {
-  using NameTag = std::integer_sequence<Char, chars...>;
+  using Tag = std::integer_sequence<Char, chars...>;
   static constexpr char name_data[]{chars..., static_cast<Char>(0)};
   static constexpr std::basic_string_view<Char> name{name_data};
   static constexpr bool has_value = !std::is_void_v<T>;

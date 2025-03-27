@@ -82,7 +82,7 @@ constexpr auto ElemList<Elems...>::Find(
   return Accumulate(nullptr, [](auto acc, auto ele) {
     if constexpr (!std::is_same_v<std::decay_t<decltype(acc)>, nullptr_t>)
       return acc;
-    else if constexpr (std::is_same_v<typename decltype(ele)::NameTag,
+    else if constexpr (std::is_same_v<typename decltype(ele)::Tag,
                                       std::integer_sequence<Char, chars...>>)
       return ele;
     else
@@ -102,9 +102,9 @@ constexpr T ElemList<Elems...>::ValueOfName(
     std::basic_string_view<Char> name) const {
   T value{};
   FindIf([name, &value](auto ele) {
-    if constexpr (std::is_same_v<std::decay_t<decltype(ele.name)>,
-                                 std::basic_string_view<Char>> &&
-                  ele.template ValueTypeIs<T>()) {
+    using Elem = std::decay_t<decltype(ele)>;
+    if constexpr (std::is_same_v<typename Elem::Tag::value_type, Char> &&
+                  Elem::template ValueTypeIs<T>()) {
       if (ele.name == name) {
         value = ele.value;
         return true;
@@ -140,7 +140,7 @@ template <typename Char, Char... chars>
 constexpr bool ElemList<Elems...>::Contains(
     std::integer_sequence<Char, chars...> name) const {
   return static_cast<size_t>(-1) != FindIf([](auto ele) {
-           if constexpr (std::is_same_v<typename decltype(ele)::NameTag,
+           if constexpr (std::is_same_v<typename decltype(ele)::Tag,
                                         std::integer_sequence<Char, chars...>>)
              return true;
            else

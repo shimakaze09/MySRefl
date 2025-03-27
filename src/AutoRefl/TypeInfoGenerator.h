@@ -17,19 +17,19 @@ class TypeInfoGenerator {
     bool namespaceNameWithQuotation{false};
     bool isAttrValueToFunction{false};
 
-    std::string_view nameof_namespace = _MySRefl::nameof_namespace;
+    std::string_view nameof_namespace = MyMeta::nameof_namespace;
 
     bool isInitializerAsAttr{true};
 
-    std::string_view nameof_initializer = _MySRefl::nameof_initializer;
+    std::string_view nameof_initializer = MyMeta::nameof_initializer;
     bool isInitializerToFunction{true};
 
-    std::string_view nameof_constructor = _MySRefl::nameof_constructor;
-    std::string_view nameof_destructor = _MySRefl::nameof_destructor;
+    std::string_view nameof_constructor = MyMeta::nameof_constructor;
+    std::string_view nameof_destructor = MyMeta::nameof_destructor;
 
     bool generateDefaultFunctions{true};
     std::string_view nameof_default_functions =
-        _MySRefl::nameof_default_functions;
+        MyMeta::nameof_default_functions;
     ConstMode attrListConstMode{ConstMode::Constepxr};
     ConstMode fieldListConstMode{ConstMode::Constepxr};
   };
