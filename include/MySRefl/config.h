@@ -10,7 +10,7 @@
 
 // AutoRefl will use these names
 namespace MyMeta  {
-static constexpr char nameof_namespace[] = "_MySRefl";
+static constexpr char nameof_namespace[] = "MyMeta";
 
 static constexpr char initializer[] = "MyMeta_initializer";
 static constexpr char default_functions[] = "MyMeta_default_functions";
