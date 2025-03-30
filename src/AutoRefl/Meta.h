@@ -18,7 +18,7 @@ struct Attr {
   // name
   std::string GenerateName(bool withoutQuatation) const;
   std::string GenerateValue(bool toFunction) const;
-  std::string GenerateValue(const std::string& type, bool toFunction) const;
+  std::string GenerateValue(const std::string& type) const;
 };
 
 enum class AccessSpecifier { PUBLIC, PROTECTED, PRIVATE, DEFAULT };
@@ -30,7 +30,7 @@ struct Parameter {
   bool isPacked{false};
   std::string type;  // typename, class, ...
   std::string name;
-  std::string initializer;  // {expression}
+  std::string initializer;  // expression or {expression}
 
   // type[...]
   std::string GenerateTypeName() const;
@@ -52,7 +52,7 @@ struct Field {
   std::vector<DeclSpecifier> declSpecifiers;
   std::vector<std::string> pointerOperators;  // *, &, &&
   std::string name;
-  std::string initializer;  // {expression}
+  std::string initializer;  // expression or {expression}
   std::vector<Parameter> parameters;
   std::vector<std::string> qualifiers;  // const, volatile, &, &&
   bool isTemplate{false};
@@ -63,8 +63,10 @@ struct Field {
   std::string GenerateFieldType() const;
   // typeSpecifier + pointerOperators
   std::string GenerateSimpleFieldType() const;
-  // Mode::Function && contains 'static'
+  // Mode::Function && contains 'static' && !friend
   bool IsMemberFunction() const;
+  bool IsFriendFunction() const;
+  bool IsDeletedFunction() const;
   // arg_type0, arg_type1, ..., arg_typeN
   std::string GenerateParamTypeList() const;
   // arg_type0, arg_type1, ..., arg_type(num-1)
@@ -110,6 +112,7 @@ struct TypeMeta {
   std::string GenerateTemplateList() const;
   std::vector<size_t> GetPublicBaseIndices() const;
   bool IsOverloaded(std::string_view name) const;
-  bool HaveAnyPublicField() const;
+  // public, non-friend, non-delete
+  bool HaveAnyOutputField() const;
 };
 }  // namespace My::MySRefl

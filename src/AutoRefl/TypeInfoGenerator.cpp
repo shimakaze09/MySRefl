@@ -96,11 +96,12 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
         ss << indent << "inline static FieldList fields = {";
         break;
     }
-    if (typeMeta.HaveAnyPublicField()) {
+    if (typeMeta.HaveAnyOutputField()) {
       ss << endl;
       for (const auto& field : typeMeta.fields) {
         if (field.isTemplate ||
-            field.accessSpecifier != AccessSpecifier::PUBLIC)
+            field.accessSpecifier != AccessSpecifier::PUBLIC ||
+            field.IsFriendFunction() || field.IsDeletedFunction())
           continue;
 
         ss << indent << indent << "Field {";
@@ -169,9 +170,8 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
                 attr.ns.empty() ? config.nonNamespaceNameWithoutQuotation
                                 : !config.namespaceNameWithQuotation);
             ss << indent << indent << indent << "Attr {" << name << ", "
-               << attr.GenerateValue(field.GenerateSimpleFieldType(),
-                                     config.isInitializerToFunction)
-               << "}," << endl;
+               << attr.GenerateValue(field.GenerateSimpleFieldType()) << "},"
+               << endl;
           }
           // [default functions]
           if (hasDefaultFunctionsAttr) {
@@ -191,7 +191,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
                 ss << indent << indent << indent << indent << "WrapConstructor<"
                    << tname << "(" << field.GenerateParamTypeList(num)
                    << ")>()";
-              } else {
+              } else if (field.IsMemberFunction()) {
                 auto qualifiers = field.GenerateQualifiers();
                 bool isPointer = qualifiers.find('&') == std::string::npos;
                 if (isPointer)
@@ -204,6 +204,17 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
                    << (isPointer ? "__this->"
                                  : ("std::forward<" + ftname + ">(__this)."))
                    << field.name << "("
+                   << field.GenerateForwardArgumentList(num) << "); }";
+              } else {  // static
+                auto qualifiers = field.GenerateQualifiers();
+                bool isPointer = qualifiers.find('&') == std::string::npos;
+                if (isPointer)
+                  qualifiers += "*";
+
+                auto ftname = tname + " " + qualifiers;
+                ss << indent << indent << indent << indent << "[]("
+                   << field.GenerateNamedParameterList(num) << "){ return "
+                   << tname << "::" << field.name << "("
                    << field.GenerateForwardArgumentList(num) << "); }";
               }
               if (i != defaultParameterNum)

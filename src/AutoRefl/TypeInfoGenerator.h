@@ -22,7 +22,6 @@ class TypeInfoGenerator {
     bool isInitializerAsAttr{true};
 
     std::string_view nameof_initializer = MyMeta::nameof_initializer;
-    bool isInitializerToFunction{true};
 
     std::string_view nameof_constructor = MyMeta::nameof_constructor;
     std::string_view nameof_destructor = MyMeta::nameof_destructor;
