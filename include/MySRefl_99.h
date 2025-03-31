@@ -8,7 +8,7 @@
 #include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/main/LICENSE
 
 #define TSTR(s)                               \
-  My::MySRefl::detail::TNameImpl1([] {       \
+  My::MySRefl::detail::TNameImpl1([] {        \
     struct tmp {                              \
       static constexpr decltype(auto) get() { \
         return (s);                           \
@@ -94,7 +94,7 @@ constexpr auto DFS_Acc(T t, F&& f, Acc&& acc) {
 
 template <class TI, class U, class F>
 constexpr void NV_Var(TI info, U&& u, F&& f) {
-  info.fields.ForEach([&](auto k) {
+  info.fields.ForEach([&](const auto& k) {
     if constexpr (!k.is_static && !k.is_func)
       std::forward<F>(f)(k, std::forward<U>(u).*(k.value));
   });
@@ -329,7 +329,7 @@ struct TypeInfoBase {
   template <class U, class Func>
   static constexpr void ForEachVarOf(U&& obj, Func&& func) {
     VirtualBases().ForEach([&](auto vb) {
-      vb.fields.ForEach([&](auto fld) {
+      vb.fields.ForEach([&](const auto& fld) {
         if constexpr (!fld.is_static && !fld.is_func)
           std::forward<Func>(func)(fld, std::forward<U>(obj).*(fld.value));
       });
