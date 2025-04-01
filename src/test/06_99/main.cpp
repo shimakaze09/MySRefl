@@ -60,7 +60,7 @@ void test_basic() {
     });
   });
 
-  constexpr auto y_field = TypeInfo<Point>::fields.Find(TSTR("y"));
+  constexpr const auto& y_field = TypeInfo<Point>::fields.Find(TSTR("y"));
   static_assert(y_field.name == "y");
 
   static_assert(TypeInfo<Point>::fields.Contains(TSTR("x")));

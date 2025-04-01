@@ -33,7 +33,7 @@ struct TStr {
   }
 
   static constexpr char name_data[]{chars..., Char(0)};
-  static constexpr std::string_view name{name_data};
+  static constexpr std::basic_string_view<Char> name{name_data};
 };
 
 template <typename T>
