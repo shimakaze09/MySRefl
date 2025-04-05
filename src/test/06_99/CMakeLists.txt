@@ -1,8 +1,14 @@
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    RETURN()
+ENDIF ()
+
 SET(c_options "")
 IF (MSVC)
     LIST(APPEND c_options "/wd5030;/permissive-")
-ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-    LIST(APPEND c_options "-Wno-attributes")
+ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    LIST(APPEND c_options "-Wno-attributes")     
+#ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+#    LIST(APPEND c_options "-Wno-attributes")
 ENDIF ()
 
 ADD_TARGET(
