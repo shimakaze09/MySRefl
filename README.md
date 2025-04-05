@@ -49,9 +49,6 @@ struct Point {
 
 template<>
 struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-  static constexpr char name[6] = "Point";
-#endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
     Field {TSTR("x"), &Type::x},
@@ -61,9 +58,12 @@ struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
 
 int main() {
   Point p{ 1.f, 2.f };
-  My::MySRefl::TypeInfo<Point>::ForEachVarOf(p, [](auto field, auto&& var) {
-    std::cout << field.name << ": " << var << std::endl;
-  });
+  My::MySRefl::TypeInfo<Point>::ForEachVarOf(
+    p,
+    [](const auto& field, auto&& var) {
+      std::cout << field.name << ": " << var << std::endl;
+    }
+  );
 }
 ```
 
@@ -104,5 +104,5 @@ You can choose one of the following three methods
 ## Compiler compatibility
 
 - Clang/LLVM >= 6
-- GCC >= 7.3
-- MSVC++ >= 19.20 / VS 2019 + (not fully support virtual inheritance because of a MSVC++ bug)
+- ~~GCC >= 7.3~~
+- MSVC >= 19.20 / VS 2019 + (not fully support virtual inheritance because of a MSVC++ bug)

@@ -13,10 +13,6 @@ The library is well-designed so it's very tiny (only 99 lines), so it's easy to 
 library. [MySRefl_99.h](../include/MySRefl_99.h) is condensed from  [MySRefl.h](../include/MySRefl/MySRefl.h) which is
 much easier to read. Both of them have the same API.
 
-> the difference between MySRefl_99.h and MySRefl.h
->
-> - `name`
-
 ## 1. Design
 
 The library is noninvasive and static.
@@ -72,10 +68,6 @@ Then we need to write a declaration for it.
  ```c++
  template<>
  struct TypeInfo<Point> : TypeInfoBase<Point> {
-   // the name is declared by TypeInfoBase<Point>
-   // if you use MySRefl_99.h, you should declare it here.
-   // static constexpr std::string_view name = "struct Point";
- 
    static constexpr FieldList fields = {
      Field{"x", &Point::x, AttrList{ Attr{ "not_serialize" } }},
      Field{"y", &Point::y, AttrList{ Attr{ "info", "hello" } }}
