@@ -11,8 +11,8 @@
 using namespace My::MySRefl;
 using namespace std;
 
-template <size_t N>
-constexpr size_t Func() {
+template <std::size_t N>
+constexpr std::size_t Func() {
   return N;
 }
 
@@ -24,9 +24,6 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 
 template <>
 struct My::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-  static constexpr char name[6] = "Color";
-#endif
   static constexpr AttrList attrs = {
       Attr{TSTR("enum_attr"), "enum_attr_value"},
   };
@@ -82,7 +79,7 @@ int main() {
                       .attrs.Find(TSTR("func"))
                       .value() == 2);
     // runtime
-    size_t rst = static_cast<size_t>(-1);
+    std::size_t rst = static_cast<std::size_t>(-1);
     TypeInfo<Color>::fields.FindIf([nameof_red, &rst](auto field) {
       if (field.name == nameof_red) {
         rst = field.attrs.Find(TSTR("func")).value();
@@ -101,7 +98,7 @@ int main() {
             .value() == 2);
 
     // runtime
-    size_t rst = static_cast<size_t>(-1);
+    std::size_t rst = static_cast<std::size_t>(-1);
     TypeInfo<Color>::fields.FindIf([red, &rst](auto field) {
       if (field.value == red) {
         rst = field.attrs.Find(TSTR("func")).value();

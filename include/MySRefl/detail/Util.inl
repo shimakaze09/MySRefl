@@ -19,7 +19,7 @@ struct IntegerSequenceTraits;
 
 template <typename T, T N0, T... Ns>
 struct IntegerSequenceTraits<std::integer_sequence<T, N0, Ns...>> {
-  static constexpr size_t head = N0;
+  static constexpr std::size_t head = N0;
   static constexpr auto tail = std::integer_sequence<T, Ns...>{};
 };
 

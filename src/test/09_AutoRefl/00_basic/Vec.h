@@ -17,7 +17,7 @@ struct [[size(sizeof(T))]] /*compile-time attr*/ Vec {
   [[info("hello"), maximum(10.f)]]  // attr list
   T y;
   // static member variable
-  inline static size_t num{0};
+  inline static std::size_t num{0};
 
   // non-static member function
   float Sum() const { return x + y; }

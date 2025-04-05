@@ -8,10 +8,6 @@ template<typename T>
 struct My::MySRefl::TypeInfo<My::Nested::Vec<T>> :
     TypeInfoBase<My::Nested::Vec<T>>
 {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-    // [!] all instance types have the same name
-    static constexpr char name[16] = "My::Nested::Vec";
-#endif
     static constexpr AttrList attrs = {
         Attr {TSTR("size"), sizeof(T)},
     };
@@ -27,7 +23,7 @@ struct My::MySRefl::TypeInfo<My::Nested::Vec<T>> :
             Attr {TSTR("maximum"), 10.f},
         }},
         Field {TSTR("num"), &My::Nested::Vec<T>::num, AttrList {
-            Attr {TSTR(MyMeta::initializer), []()->size_t{ return {0}; }},
+            Attr {TSTR(MyMeta::initializer), []()->std::size_t{ return {0}; }},
         }},
         Field {TSTR("Sum"), static_cast<float(My::Nested::Vec<T>::*)()const>(&My::Nested::Vec<T>::Sum)},
         Field {TSTR("Sum"), static_cast<float(My::Nested::Vec<T>::*)(float, float)const>(&My::Nested::Vec<T>::Sum), AttrList {

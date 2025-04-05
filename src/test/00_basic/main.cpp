@@ -15,9 +15,6 @@ struct Point {
 
 template <>
 struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-  static constexpr char name[6] = "Point";
-#endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("x"), &Type::x},

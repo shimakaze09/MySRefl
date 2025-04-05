@@ -19,10 +19,6 @@ struct [[size(8)]] Point {
 
 template <typename T>
 struct My::MySRefl::TypeInfo<Point<T>> : TypeInfoBase<Point<T>> {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-  // [!] all instance types have the same name
-  static constexpr char name[6] = "Point";
-#endif
   static constexpr AttrList attrs = {
       Attr{TSTR("size"), 8},
   };

@@ -32,7 +32,7 @@ struct TStr {
   static constexpr std::basic_string_view<C> name{name_data};
 };
 
-template <class C, class T, size_t... N>
+template <class C, class T, std::size_t... N>
 constexpr auto TNameImpl2(std::index_sequence<N...>) {
   return TStr<C, T::get()[N]...>();
 }
@@ -45,12 +45,13 @@ constexpr auto TNameImpl1(T) {
 }
 
 template <class L, class F>
-constexpr size_t FindIf(const L&, F&&, std::index_sequence<>) {
+constexpr std::size_t FindIf(const L&, F&&, std::index_sequence<>) {
   return -1;
 }
 
-template <class L, class F, size_t N0, size_t... Ns>
-constexpr size_t FindIf(const L& l, F&& f, std::index_sequence<N0, Ns...>) {
+template <class L, class F, std::size_t N0, std::size_t... Ns>
+constexpr std::size_t FindIf(const L& l, F&& f,
+                             std::index_sequence<N0, Ns...>) {
   return f(l.template Get<N0>())
              ? N0
              : FindIf(l, std::forward<F>(f), std::index_sequence<Ns...>{});
@@ -61,8 +62,8 @@ constexpr auto Acc(const L&, F&&, R&& r, std::index_sequence<>) {
   return std::forward<R>(r);
 }
 
-template <bool m0, bool... ms, class L, class F, class R, size_t N0,
-          size_t... Ns>
+template <bool m0, bool... ms, class L, class F, class R, std::size_t N0,
+          std::size_t... Ns>
 constexpr auto Acc(const L& l, F&& f, R r, std::index_sequence<N0, Ns...>) {
   if constexpr (!m0)
     return Acc<ms...>(l, std::forward<F>(f), std::move(r),
@@ -73,13 +74,13 @@ constexpr auto Acc(const L& l, F&& f, R r, std::index_sequence<N0, Ns...>) {
                       std::index_sequence<Ns...>{});
 }
 
-template <class L, class F, class R, size_t N0, size_t... Ns>
+template <class L, class F, class R, std::size_t N0, std::size_t... Ns>
 constexpr auto Acc(const L& l, F&& f, R r, std::index_sequence<N0, Ns...>) {
   return Acc(l, std::forward<F>(f), f(std::move(r), l.template Get<N0>()),
              std::index_sequence<Ns...>{});
 }
 
-template <size_t D, class T, class R, class F>
+template <std::size_t D, class T, class R, class F>
 constexpr auto DFS_Acc(T t, F&& f, R r) {
   return t.bases.Accumulate(std::move(r), [&](auto r, auto b) {
     if constexpr (b.is_virtual)
@@ -133,7 +134,7 @@ struct NamedValue<Name, void> : Name { /*T value;*/
 template <typename... Es>
 struct ElemList {
   std::tuple<Es...> elems;
-  static constexpr size_t size = sizeof...(Es);
+  static constexpr std::size_t size = sizeof...(Es);
 
   constexpr ElemList(Es... elems) : elems{elems...} {}
 
@@ -157,25 +158,26 @@ struct ElemList {
   }
 
   template <class Func>
-  constexpr size_t FindIf(Func&& func) const {
+  constexpr std::size_t FindIf(Func&& func) const {
     return detail::FindIf(*this, std::forward<Func>(func),
                           std::make_index_sequence<sizeof...(Es)>{});
   }
 
   template <class S>
   constexpr const auto& Find(S = {}) const {
-    return Get<[]() {
+    constexpr auto idx = []() {
       return std::apply(
           [](auto... n) {
             bool b{};
             return ((b ? 0 : (n == S::name ? (b = true, 0) : 1)) + ...);
           },
           std::tuple{Es::name...});
-    }()>();
+    }();
+    return Get<idx>();
   }
 
   template <class T>
-  constexpr size_t FindValue(const T& v) const {
+  constexpr std::size_t FindValue(const T& v) const {
     return FindIf([&v](auto e) { return e == v; });
   }
 
@@ -214,7 +216,7 @@ struct ElemList {
       return Push(e);
   }
 
-  template <size_t N>
+  template <std::size_t N>
   constexpr const auto& Get() const {
     return std::get<N>(elems);
   }
@@ -341,7 +343,7 @@ struct TypeInfoBase {
                    std::forward<Func>(func));
   }
 };
-template <class Name, class Char, size_t N>
+template <class Name, class Char, std::size_t N>
 Attr(Name, const Char (&)[N]) -> Attr<Name, std::basic_string_view<Char>>;
 template <class Name>
 Attr(Name) -> Attr<Name, void>;

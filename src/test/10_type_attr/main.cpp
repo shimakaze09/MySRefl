@@ -65,9 +65,6 @@ struct Range {
 
 template <>
 struct My::MySRefl::TypeInfo<MyMeta::Range> : TypeInfoBase<MyMeta::Range> {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-  static constexpr char name[] = "MyMeta::Range";
-#endif
   static constexpr auto tname = TSTR(name);
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -90,9 +87,6 @@ struct Point {
 
 template <>
 struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
-#ifdef My_MySRefl_NOT_USE_NAMEOF
-  static constexpr char name[6] = "Point";
-#endif
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("x"), &Type::x,
@@ -111,7 +105,7 @@ int main() {
     constexpr auto tstr_range = TSTR("MyMeta::Range");
     if constexpr (decltype(field.attrs)::Contains(tstr_range)) {
       auto r = attr_init(tstr_range, field.attrs.Find(tstr_range).value);
-      cout << "[" << tstr_range.name << "] " << r.minV << ", " << r.maxV
+      cout << "[" << tstr_range.value << "] " << r.minV << ", " << r.maxV
            << endl;
     }
     cout << field.name << ": " << var << endl;

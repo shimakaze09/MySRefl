@@ -13,7 +13,7 @@ namespace My::MySRefl {
 template <typename... Elems>
 struct ElemList {
   std::tuple<Elems...> elems;
-  static constexpr size_t size = sizeof...(Elems);
+  static constexpr std::size_t size = sizeof...(Elems);
 
   constexpr ElemList(Elems... elems) : elems{elems...} {}
 
@@ -24,13 +24,13 @@ struct ElemList {
   constexpr void ForEach(Func&& func) const;
 
   template <typename Func>
-  constexpr size_t FindIf(Func&& func) const;
+  constexpr std::size_t FindIf(Func&& func) const;
 
   template <typename Name>
   constexpr const auto& Find(Name = {}) const;
 
   template <typename T>
-  constexpr size_t FindValue(const T& value) const;
+  constexpr std::size_t FindValue(const T& value) const;
 
   template <typename T, typename Str>
   constexpr const T* ValuePtrOfName(Str name) const;
@@ -46,7 +46,7 @@ struct ElemList {
   template <typename Name>
   static constexpr bool Contains(Name = {});
 
-  template <size_t N>
+  template <std::size_t N>
   constexpr const auto& Get() const;
 
   template <typename Elem>

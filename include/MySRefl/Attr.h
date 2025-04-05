@@ -15,7 +15,7 @@ namespace My::MySRefl {
 template <typename Name, typename T>
 struct Attr;
 
-template <typename Name, typename Char, size_t N>
+template <typename Name, typename Char, std::size_t N>
 Attr(Name, const Char (&)[N]) -> Attr<Name, std::basic_string_view<Char>>;
 
 template <typename Name>

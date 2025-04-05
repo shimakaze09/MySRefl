@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "TStr.h"
+#include <MyTemplate/TStr.h>
 
 #include <string_view>
 
@@ -13,18 +13,24 @@ template <typename Name, typename T>
 struct NamedValue;
 
 template <typename Name, typename T>
-struct NamedValueBase : Name {
+struct NamedValueBase {
   static_assert(IsTStr<Name>::value);
 
+  static constexpr std::string_view name = Name::value;
   static constexpr bool has_value = !std::is_void_v<T>;
 
+  template <typename Str>
+  static constexpr bool NameIs(Str = {}) noexcept {
+    return std::is_same_v<Str, Name>;
+  }
+
   template <typename U>
-  static constexpr bool ValueTypeIs() {
+  static constexpr bool ValueTypeIs() noexcept {
     return std::is_same_v<T, U>;
   }
 
   template <typename U>
-  static constexpr bool ValueTypeIsSameWith(U) {
+  static constexpr bool ValueTypeIsSameWith(U) noexcept {
     return ValueTypeIs<U>();
   }
 };

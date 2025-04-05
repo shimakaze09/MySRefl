@@ -20,9 +20,6 @@ struct [[size(8)]] Point {
 
 template <>
 struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
-#ifdef MY_MYSREFL_NOT_USE_NAMEOF
-  static constexpr char name[6] = "Point";
-#endif
   static constexpr AttrList attrs = {
       Attr{TSTR("size"), 8},
   };
@@ -39,7 +36,7 @@ struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
   };
 };
 
-template <typename T, size_t... Ns>
+template <typename T, std::size_t... Ns>
 constexpr auto GetXZ(std::index_sequence<Ns...>) {
   // get fields with name "x" or "z"
   constexpr auto masks = TypeInfo<T>::fields.Accumulate(

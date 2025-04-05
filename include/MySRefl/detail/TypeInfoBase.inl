@@ -50,7 +50,7 @@ constexpr auto TypeInfoBase<T, Bases...>::VirtualBases() {
   });
 }
 
-template <size_t Depth, typename T, typename Acc, typename Func>
+template <std::size_t Depth, typename T, typename Acc, typename Func>
 constexpr auto detail_DFS_Acc(T type, Acc&& acc, Func&& func) {
   return type.bases.Accumulate(
       std::forward<Acc>(acc), [&](auto&& acc, auto base) {
@@ -86,7 +86,7 @@ constexpr auto TypeInfoBase<T, Bases...>::DFS_Acc(Init&& init, Func&& func) {
 template <typename T, typename... Bases>
 template <typename Func>
 constexpr void TypeInfoBase<T, Bases...>::DFS_ForEach(Func&& func) {
-  DFS_Acc(0, [&](auto, auto t, size_t depth) {
+  DFS_Acc(0, [&](auto, auto t, std::size_t depth) {
     std::forward<Func>(func)(t, depth);
     return 0;
   });

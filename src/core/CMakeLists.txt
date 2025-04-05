@@ -1,14 +1,8 @@
 SET(c_options "")
 IF (MSVC)
     LIST(APPEND c_options "/wd5030")
-ENDIF ()
-
-SET(libs "")
-SET(defines "")
-IF (MySRefl_UseNameof)
-    LIST(APPEND libs nameof::nameof)
-ELSE ()
-    LIST(APPEND defines MY_MYSREFL_NOT_USE_NAMEOF)
+ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    LIST(APPEND c_options "-Wno-attributes")
 ENDIF ()
 
 ADD_TARGET(
@@ -18,7 +12,5 @@ ADD_TARGET(
         C_OPTION
         ${c_options}
         LIB
-        ${libs}
-        DEFINE
-        ${defines}
+        My::MyTemplate_core
 )

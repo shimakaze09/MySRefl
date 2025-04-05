@@ -6,17 +6,13 @@
 
 #include "BaseList.h"
 
-#ifdef MY_MYSREFL_USE_NAMEOF
-#include <nameof.hpp>
-#endif
+#include <MyTemplate/Name.h>
 
 namespace My::MySRefl {
 template <typename T, typename... Bases>
 struct TypeInfoBase {
   using Type = T;
-#ifdef MY_MYSREFL_USE_NAMEOF
-  static constexpr std::string_view name = nameof::nameof_type<T>();
-#endif
+  static constexpr std::string_view name = type_name<T>().value;
   static constexpr BaseList bases = {Bases{}...};
 
   template <typename Derived>
