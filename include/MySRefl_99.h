@@ -58,20 +58,8 @@ constexpr std::size_t FindIf(const L& l, F&& f,
 }
 
 template <class L, class F, class R>
-constexpr auto Acc(const L&, F&&, R&& r, std::index_sequence<>) {
-  return std::forward<R>(r);
-}
-
-template <bool m0, bool... ms, class L, class F, class R, std::size_t N0,
-          std::size_t... Ns>
-constexpr auto Acc(const L& l, F&& f, R r, std::index_sequence<N0, Ns...>) {
-  if constexpr (!m0)
-    return Acc<ms...>(l, std::forward<F>(f), std::move(r),
-                      std::index_sequence<Ns...>{});
-  else
-    return Acc<ms...>(l, std::forward<F>(f),
-                      f(std::move(r), l.template Get<N0>()),
-                      std::index_sequence<Ns...>{});
+constexpr auto Acc(const L&, F&&, R r, std::index_sequence<>) {
+  return r;
 }
 
 template <class L, class F, class R, std::size_t N0, std::size_t... Ns>
@@ -139,15 +127,15 @@ struct ElemList {
 
   constexpr ElemList(Es... elems) : elems{elems...} {}
 
-  template <bool... ms, class Init, class Func>
+  template <class Init, class Func>
   constexpr auto Accumulate(Init init, Func&& func) const {
-    return detail::Acc<ms...>(*this, std::forward<Func>(func), std::move(init),
-                              std::make_index_sequence<size>{});
+    return detail::Acc(*this, std::forward<Func>(func), std::move(init),
+                       std::make_index_sequence<size>{});
   }
 
-  template <bool... ms, class Func>
+  template <class Func>
   constexpr void ForEach(Func&& func) const {
-    Accumulate<ms...>(0, [&](auto, const auto& field) {
+    Accumulate(0, [&](auto, const auto& field) {
       std::forward<Func>(func)(field);
       return 0;
     });
