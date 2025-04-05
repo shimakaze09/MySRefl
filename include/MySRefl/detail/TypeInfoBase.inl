@@ -8,7 +8,8 @@ namespace My::MySRefl::detail {
 template <typename TI, typename U, typename Func>
 constexpr void ForEachNonVirtualVarOf(TI info, U&& obj, Func&& func) {
   info.fields.ForEach([&](const auto& field) {
-    if constexpr (!field.is_static && !field.is_func)
+    using Fld = std::remove_const_t<std::remove_reference_t<decltype(field)>>;
+    if constexpr (!Fld::is_static && !Fld::is_func)
       std::forward<Func>(func)(field, std::forward<U>(obj).*(field.value));
   });
   info.bases.ForEach([&](auto base) {
@@ -98,7 +99,8 @@ constexpr void TypeInfoBase<T, Bases...>::ForEachVarOf(U&& obj, Func&& func) {
   static_assert(std::is_same_v<Type, std::decay_t<U>>);
   VirtualBases().ForEach([&](auto vb) {
     vb.fields.ForEach([&](const auto& field) {
-      if constexpr (!field.is_static && !field.is_func)
+      using Fld = std::remove_const_t<std::remove_reference_t<decltype(field)>>;
+      if constexpr (!Fld::is_static && !Fld::is_func)
         std::forward<Func>(func)(field, std::forward<U>(obj).*(field.value));
     });
   });

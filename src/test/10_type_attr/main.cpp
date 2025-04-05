@@ -46,10 +46,10 @@ constexpr auto attr_init(Str, Value&& v) {
     return T{std::forward<Value>(v)};
 }
 
-#define TYPEOF_REGISTER(T)                                                   \
-  template <>                                                                \
-  struct MyMeta::Typeof<std::remove_const_t<decltype(TypeInfo<T>::tname)>> { \
-    using type = MyMeta::Range;                                              \
+#define TYPEOF_REGISTER(X)                            \
+  template <>                                         \
+  struct MyMeta::Typeof<typename TypeInfo<X>::TName> { \
+    using type = X;                                   \
   }
 
 //
@@ -65,7 +65,6 @@ struct Range {
 
 template <>
 struct My::MySRefl::TypeInfo<MyMeta::Range> : TypeInfoBase<MyMeta::Range> {
-  static constexpr auto tname = TSTR(name);
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("minV"), &Type::minV},
