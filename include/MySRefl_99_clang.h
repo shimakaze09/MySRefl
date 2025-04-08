@@ -1,43 +1,48 @@
 #pragma once  // My Static Reflection -- 99 lines
 
 #include <string_view>  // Repository: https://github.com/shimakaze09/MySRefl
-#include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/main/LICENSE
+#include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/master/LICENSE
 
-#define TSTR(s)                                                  \
-  ([] {                                                          \
-    constexpr std::basic_string_view str{s};                     \
-    return My::detail::TStr<My::detail::fcstr<                   \
-        typename decltype(str)::value_type, str.size()>{str}>{}; \
+#define TSTR(s)                           \
+  ([] {                                   \
+    struct tmp {                          \
+      static constexpr auto get() {       \
+        return std::basic_string_view{s}; \
+      }                                   \
+    };                                    \
+    return My::detail::TSTRH(tmp{});      \
   }())
 
 namespace My::detail {
-template <typename C, std::size_t N>
-struct fcstr {
-  using value_type = C;
-  value_type data[N + 1]{};
-  static constexpr std::size_t size = N;
-
-  constexpr fcstr(std::basic_string_view<value_type> str) {
-    for (std::size_t i{0}; i < size; ++i)
-      data[i] = str[i];
-  }
-};
-
-template <fcstr str>
+template <typename C, C... chars>
 struct TStr {
-  using Char = typename decltype(str)::value_type;
+  using Char = C;
 
   template <typename T>
   static constexpr bool Is(T = {}) {
     return std::is_same_v<T, TStr>;
   }
 
-  static constexpr auto Data() { return str.data; }
+  static constexpr const Char* Data() { return data; }
 
-  static constexpr auto Size() { return str.size; }
+  static constexpr std::size_t Size() { return sizeof...(chars); }
 
-  static constexpr std::basic_string_view<Char> View() { return str.data; }
+  static constexpr std::basic_string_view<Char> View() { return data; }
+
+ private:
+  static constexpr Char data[]{chars..., Char(0)};
 };
+
+template <typename Char, typename T, std::size_t... Ns>
+constexpr auto TSTRHI(std::index_sequence<Ns...>) {
+  return TStr<Char, T::get()[Ns]...>{};
+}
+
+template <typename T>
+constexpr auto TSTRH(T) {
+  return TSTRHI<typename decltype(T::get())::value_type, T>(
+      std::make_index_sequence<T::get().size()>{});
+}
 
 template <class L, class F>
 constexpr std::size_t FindIf(const L&, F&&, std::index_sequence<>) {

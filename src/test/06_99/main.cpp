@@ -2,7 +2,12 @@
 // Created by Admin on 11/03/2025.
 //
 
+#ifdef __clang__
+#include <MySRefl_99_clang.h>
+#else
 #include <MySRefl_99.h>
+#endif
+
 #include <array>
 #include <cassert>
 #include <iostream>
