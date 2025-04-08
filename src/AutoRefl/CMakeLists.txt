@@ -3,6 +3,7 @@ IF (NOT MySRefl_Build_AutoRefl)
 ENDIF ()
 
 ADD_TARGET(
+        CXX_STANDARD 17
         MODE EXE
         OUTPUT_NAME AutoRefl
         LIB

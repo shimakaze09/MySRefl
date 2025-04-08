@@ -12,7 +12,7 @@ INIT_PROJECT()
 
 OPTION(MySRefl_Build_AutoRefl "Build AutoRefl" OFF)
 IF (MySRefl_Build_AutoRefl)
-    ADD_DEP(MyANTLR 0.2.0)
+    ADD_DEP(MyANTLR 0.2.1)
 ENDIF ()
 
 ADD_DEP(MyTemplate 0.6.0)

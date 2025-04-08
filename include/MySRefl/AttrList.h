@@ -11,8 +11,6 @@
 namespace My::MySRefl {
 template <typename... Attrs>
 struct AttrList : ElemList<Attrs...> {
-  // static_assert((detail::IsInstance<Attrs, Attr>::value && ...));
-
   constexpr AttrList(Attrs... attrs) : ElemList<Attrs...>{attrs...} {}
 };
 }  // namespace My::MySRefl
