@@ -46,10 +46,10 @@ constexpr auto attr_init(Str, Value&& v) {
     return T{std::forward<Value>(v)};
 }
 
-#define TYPEOF_REGISTER(X)                            \
-  template <>                                         \
+#define TYPEOF_REGISTER(X)                             \
+  template <>                                          \
   struct MyMeta::Typeof<typename TypeInfo<X>::TName> { \
-    using type = X;                                   \
+    using type = X;                                    \
   }
 
 //
@@ -104,7 +104,7 @@ int main() {
     constexpr auto tstr_range = TSTR("MyMeta::Range");
     if constexpr (decltype(field.attrs)::Contains(tstr_range)) {
       auto r = attr_init(tstr_range, field.attrs.Find(tstr_range).value);
-      cout << "[" << tstr_range.value << "] " << r.minV << ", " << r.maxV
+      cout << "[" << tstr_range.View() << "] " << r.minV << ", " << r.maxV
            << endl;
     }
     cout << field.name << ": " << var << endl;

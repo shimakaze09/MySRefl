@@ -1,48 +1,43 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #pragma once  // My Static Reflection -- 99 lines
 
 #include <string_view>  // Repository: https://github.com/shimakaze09/MySRefl
 #include <tuple>  // License: https://github.com/shimakaze09/MySRefl/blob/main/LICENSE
 
-#define TSTR(s)                               \
-  My::MySRefl::detail::TNameImpl1([] {        \
-    struct tmp {                              \
-      static constexpr decltype(auto) get() { \
-        return (s);                           \
-      }                                       \
-    };                                        \
-    return tmp{};                             \
+#define TSTR(s)                                                  \
+  ([] {                                                          \
+    constexpr std::basic_string_view str{s};                     \
+    return My::detail::TStr<My::detail::fcstr<                   \
+        typename decltype(str)::value_type, str.size()>{str}>{}; \
   }())
 
-namespace My::MySRefl::detail {
-template <class C, C... cs>
-struct TStr {
-  using Tag = TStr;
+namespace My::detail {
+template <typename C, std::size_t N>
+struct fcstr {
+  using value_type = C;
+  value_type data[N + 1]{};
+  static constexpr std::size_t size = N;
 
-  template <class T>
-  static constexpr bool NameIs(T = {}) {
-    return std::is_same_v<T, Tag>;
+  constexpr fcstr(std::basic_string_view<value_type> str) {
+    for (std::size_t i{0}; i < size; ++i)
+      data[i] = str[i];
   }
-
-  using Char = C;
-  static constexpr char name_data[]{cs..., C(0)};
-  static constexpr std::basic_string_view<C> name{name_data};
 };
 
-template <class C, class T, std::size_t... N>
-constexpr auto TNameImpl2(std::index_sequence<N...>) {
-  return TStr<C, T::get()[N]...>();
-}
+template <fcstr str>
+struct TStr {
+  using Char = typename decltype(str)::value_type;
 
-template <typename T>
-constexpr auto TNameImpl1(T) {
-  using C = std::decay_t<decltype(T::get()[0])>;
-  return TNameImpl2<C, T>(
-      std::make_index_sequence<sizeof(T::get()) / sizeof(C) - 1>());
-}
+  template <typename T>
+  static constexpr bool Is(T = {}) {
+    return std::is_same_v<T, TStr>;
+  }
+
+  static constexpr auto Data() { return str.data; }
+
+  static constexpr auto Size() { return str.size; }
+
+  static constexpr std::basic_string_view<Char> View() { return str.data; }
+};
 
 template <class L, class F>
 constexpr std::size_t FindIf(const L&, F&&, std::index_sequence<>) {
@@ -91,11 +86,17 @@ constexpr void NV_Var(TI, U&& u, F&& f) {
       NV_Var(b.info, b.info.Forward(std::forward<U>(u)), std::forward<F>(f));
   });
 }
-}  // namespace My::MySRefl::detail
+}  // namespace My::detail
 
 namespace My::MySRefl {
+template <class Name>
+struct NamedValueBase {
+  using TName = Name;
+  static constexpr std::string_view name = TName::View();
+};
+
 template <class Name, class T>
-struct NamedValue : Name {
+struct NamedValue : NamedValueBase<Name> {
   T value;
   static constexpr bool has_value = true;
 
@@ -111,7 +112,7 @@ struct NamedValue : Name {
 };
 
 template <class Name>
-struct NamedValue<Name, void> : Name { /*T value;*/
+struct NamedValue<Name, void> : NamedValueBase<Name> { /*T value;*/
   static constexpr bool has_value = false;
 
   template <class U>
@@ -143,7 +144,7 @@ struct ElemList {
 
   template <class S>
   static constexpr bool Contains(S = {}) {
-    return (Es::template NameIs<S>() || ...);
+    return (Es::TName::template Is<S>() || ...);
   }
 
   template <class Func>
@@ -158,7 +159,7 @@ struct ElemList {
       return std::apply(
           [](auto... n) {
             bool b{};
-            return ((b ? 0 : (n == S::name ? (b = true, 0) : 1)) + ...);
+            return ((b ? 0 : (n == S::View() ? (b = true, 0) : 1)) + ...);
           },
           std::tuple{Es::name...});
     }();
@@ -280,7 +281,7 @@ struct TypeInfoBase {
   static constexpr BaseList bases{Bases{}...};
 
   template <class U>
-  static constexpr auto&& Forward(U&& derived) noexcept {
+  static constexpr auto&& Forward(U&& derived) {
     if constexpr (std::is_same_v<std::decay_t<U>, U>)
       return static_cast<Type&&>(derived);  // right
     else if constexpr (std::is_same_v<std::decay_t<U>&, U>)

@@ -13,7 +13,7 @@ template <typename T, typename... Bases>
 struct TypeInfoBase {
   using Type = T;
   using TName = decltype(type_name<T>());
-  static constexpr std::string_view name = TName::value;
+  static constexpr std::string_view name = TName::View();
   static constexpr BaseList bases = {Bases{}...};
 
   template <typename Derived>

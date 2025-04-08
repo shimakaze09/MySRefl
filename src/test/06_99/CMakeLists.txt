@@ -4,7 +4,7 @@ ENDIF ()
 
 SET(c_options "")
 IF (MSVC)
-    LIST(APPEND c_options "/wd5030;/permissive-")
+    LIST(APPEND c_options "/wd5030;/wd5222;/permissive-")
 ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     LIST(APPEND c_options "-Wno-attributes")     
 #ELSEIF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
