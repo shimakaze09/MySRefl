@@ -55,8 +55,6 @@ struct ElemList {
   template <typename Elem>
   constexpr auto Insert(Elem e) const;
 
-  // value must be constexpr
-  // C++20 support string literal as template arguments
 #define MySRefl_ElemList_GetByValue(list, value) \
   list.Get<list.FindValue(value)>()
 };

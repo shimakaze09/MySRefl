@@ -19,7 +19,7 @@ class TypeInfoGenerator {
 
     std::string_view nameof_namespace = MyMeta::nameof_namespace;
 
-    bool isInitializerAsAttr{true};
+    bool isInitializerAsAttr{false};
 
     std::string_view nameof_initializer = MyMeta::nameof_initializer;
 

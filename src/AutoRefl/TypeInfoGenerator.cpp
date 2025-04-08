@@ -190,10 +190,10 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
 
                 auto ftname = tname + " " + qualifiers;
                 ss << indent << indent << indent << indent << "[](" << ftname
-                   << " __this" << (num > 0 ? ", " : "")
+                   << " this_" << (num > 0 ? ", " : "")
                    << field.GenerateNamedParameterList(num) << "){ return "
-                   << (isPointer ? "__this->"
-                                 : ("std::forward<" + ftname + ">(__this)."))
+                   << (isPointer ? "this_->"
+                                 : ("std::forward<" + ftname + ">(this_)."))
                    << field.name << "("
                    << field.GenerateForwardArgumentList(num) << "); }";
               } else {  // static

@@ -343,8 +343,8 @@ struct My::MySRefl::TypeInfo<FuncList> : TypeInfoBase<FuncList> {
       Field{TSTR("Func0"), &Type::Func0},
       Field{TSTR("Func1"), &Type::Func1,
             AttrList{
-                Attr{TSTR("default_functions"), std::tuple{[](Type* __this) {
-                       return __this->Func1();
+                Attr{TSTR("default_functions"), std::tuple{[](Type* this_) {
+                       return this_->Func1();
                      }}},
             }},
   };
