@@ -139,10 +139,10 @@ struct ElemList {
                        std::make_index_sequence<size>{});
   }
 
-  template <class Func>
-  constexpr void ForEach(Func&& func) const {
+  template <class F>
+  constexpr void ForEach(F&& f) const {
     Accumulate(0, [&](auto, const auto& field) {
-      std::forward<Func>(func)(field);
+      std::forward<F>(f)(field);
       return 0;
     });
   }
@@ -152,17 +152,17 @@ struct ElemList {
     return (Es::TName::template Is<S>() || ...);
   }
 
-  template <class Func>
-  constexpr std::size_t FindIf(Func&& func) const {
-    return detail::FindIf(*this, std::forward<Func>(func),
-                          std::make_index_sequence<sizeof...(Es)>{});
+  template <class F>
+  constexpr std::size_t FindIf(F&& f) const {
+    return detail::FindIf(*this, std::forward<F>(f),
+                          std::make_index_sequence<size>{});
   }
 
   template <class S>
   constexpr const auto& Find(S = {}) const {
     constexpr std::size_t idx = []() {
       constexpr decltype(S::View()) names[]{Es::name...};
-      for (std::size_t i = 0; i < sizeof...(Es); i++) {
+      for (std::size_t i = 0; i < size; i++) {
         if (S::View() == names[i])
           return i;
       }
@@ -194,7 +194,7 @@ struct ElemList {
   template <class T, class C = char>
   constexpr auto NameOfValue(const T& v) const {
     return Accumulate(std::basic_string_view<C>{},
-                      [&v](auto r, auto e) { return e == v ? e.name : r; });
+                      [&v](auto r, auto&& e) { return e == v ? e.name : r; });
   }
 
   template <class E>
@@ -339,12 +339,8 @@ struct TypeInfoBase {
                    std::forward<Func>(func));
   }
 };
-template <class Name, class Char, std::size_t N>
-Attr(Name, const Char (&)[N]) -> Attr<Name, std::basic_string_view<Char>>;
 template <class Name>
 Attr(Name) -> Attr<Name, void>;
-template <class Name, class T, class AList>
-Field(Name, T, AList) -> Field<Name, T, AList>;
 template <class Name, class T>
 Field(Name, T) -> Field<Name, T, AttrList<>>;
 }  // namespace My::MySRefl

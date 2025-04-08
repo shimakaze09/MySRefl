@@ -4,7 +4,6 @@
 
 #pragma once
 
-#include <string_view>
 #include "NamedValue.h"
 
 namespace My::MySRefl {
@@ -14,9 +13,6 @@ namespace My::MySRefl {
 // T value (T == void -> no value)
 template <typename Name, typename T>
 struct Attr;
-
-template <typename Name, typename Char, std::size_t N>
-Attr(Name, const Char (&)[N]) -> Attr<Name, std::basic_string_view<Char>>;
 
 template <typename Name>
 Attr(Name) -> Attr<Name, void>;

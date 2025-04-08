@@ -21,8 +21,6 @@ struct Field : detail::FieldTraits<T>, NamedValue<Name, T> {
       : NamedValue<Name, T>{name, value}, attrs{attrs} {}
 };
 
-template <typename Name, typename T, typename AList>
-Field(Name, T, AList) -> Field<Name, T, AList>;
 template <typename Name, typename T>
 Field(Name, T) -> Field<Name, T, AttrList<>>;
 }  // namespace My::MySRefl
