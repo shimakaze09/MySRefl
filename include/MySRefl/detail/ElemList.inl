@@ -86,7 +86,7 @@ constexpr const auto& ElemList<Elems...>::Find(Name) const {
 template <typename... Elems>
 template <typename T>
 constexpr std::size_t ElemList<Elems...>::FindValue(const T& value) const {
-  return FindIf([&value](const auto& e) { return e.value == value; });
+  return FindIf([&value](const auto& e) { return e == value; });
 }
 
 template <typename... Elems>
