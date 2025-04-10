@@ -38,8 +38,6 @@ Header-only, tiny (99 lines) and powerful C++20 static reflection library.
 
 ## How to use
 
-> run it online : [**compiler explorer**](https://godbolt.org/z/oWM8bf)
-
 Suppose you need to reflect `struct Vec`
 
 ```c++
