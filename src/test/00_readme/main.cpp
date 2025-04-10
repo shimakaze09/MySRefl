@@ -13,7 +13,7 @@ struct Vec {
   float x;
   float y;
 
-  float norm() const noexcept { return std::sqrt(x * x + y * y); }
+  float norm() const { return std::sqrt(x * x + y * y); }
 };
 
 template <>
