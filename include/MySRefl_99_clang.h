@@ -10,10 +10,10 @@
         return std::basic_string_view{s}; \
       }                                   \
     };                                    \
-    return My::detail::TSTRH(tmp{});      \
+    return Smkz::detail::TSTRH(tmp{});      \
   }())
 
-namespace My::detail {
+namespace Smkz::detail {
 template <typename C, C... chars>
 struct TStr {
   using Char = C;
@@ -91,9 +91,9 @@ constexpr void NV_Var(TI, U&& u, F&& f) {
       NV_Var(b.info, b.info.Forward(std::forward<U>(u)), std::forward<F>(f));
   });
 }
-}  // namespace My::detail
+}  // namespace Smkz::detail
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 template <class Name>
 struct NamedValueBase {
   using TName = Name;
@@ -343,4 +343,4 @@ template <class Name>
 Attr(Name) -> Attr<Name, void>;
 template <class Name, class T>
 Field(Name, T) -> Field<Name, T, AttrList<>>;
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

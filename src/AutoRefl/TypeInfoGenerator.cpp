@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {

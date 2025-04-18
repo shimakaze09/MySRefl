@@ -3,7 +3,7 @@
 #include <MyTemplate/TStr.hpp>
 #include <string_view>
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 template <typename Name, typename T>
 struct NamedValue;
 
@@ -57,4 +57,4 @@ template <typename Name>
 NamedValue(Name) -> NamedValue<Name, void>;
 template <typename T, typename Name>
 NamedValue(Name, T) -> NamedValue<Name, T>;
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

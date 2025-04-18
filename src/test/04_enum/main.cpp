@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 template <std::size_t N>
@@ -18,7 +18,7 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
+struct Smkz::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
   static constexpr AttrList attrs = {
       Attr{TSTR("enum_attr"), "enum_attr_value"},
   };

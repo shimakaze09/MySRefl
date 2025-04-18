@@ -5,7 +5,7 @@
 #include "Util.h"
 #include "detail/FieldTraits.h"
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 template <typename Name, typename T, typename AList>
 struct Field : detail::FieldTraits<T>, NamedValue<Name, T> {
   static_assert(detail::IsInstance<AList, AttrList>::value);
@@ -19,4 +19,4 @@ struct Field : detail::FieldTraits<T>, NamedValue<Name, T> {
 
 template <typename Name, typename T>
 Field(Name, T) -> Field<Name, T, AttrList<>>;
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

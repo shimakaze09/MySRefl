@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 struct [[size(8)]] Point {
@@ -19,7 +19,7 @@ struct [[size(8)]] Point {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
+struct Smkz::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr AttrList attrs = {
       Attr{TSTR("size"), 8},
   };

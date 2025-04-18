@@ -4,7 +4,7 @@
 #include <functional>
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 
 struct Vec {
   float x;
@@ -13,7 +13,7 @@ struct Vec {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<Vec> : TypeInfoBase<Vec> {
+struct Smkz::MySRefl::TypeInfo<Vec> : TypeInfoBase<Vec> {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("x"), &Type::x},

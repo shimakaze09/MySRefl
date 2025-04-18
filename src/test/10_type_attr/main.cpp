@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 //
@@ -59,7 +59,7 @@ struct Range {
 }  // namespace MyMeta
 
 template <>
-struct My::MySRefl::TypeInfo<MyMeta::Range> : TypeInfoBase<MyMeta::Range> {
+struct Smkz::MySRefl::TypeInfo<MyMeta::Range> : TypeInfoBase<MyMeta::Range> {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("minV"), &Type::minV},
@@ -80,7 +80,7 @@ struct Point {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
+struct Smkz::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("x"), &Type::x,

@@ -1,7 +1,7 @@
 #pragma once
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 // TypeInfoBase, attrs, fields
 template <typename T>
 struct TypeInfo;
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

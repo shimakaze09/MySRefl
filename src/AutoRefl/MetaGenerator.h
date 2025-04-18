@@ -4,7 +4,7 @@
 
 #include "Meta.h"
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 class MetaGenerator {
  public:
   MetaGenerator();
@@ -18,4 +18,4 @@ class MetaGenerator {
   struct Impl;
   std::unique_ptr<Impl> pImpl;
 };
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

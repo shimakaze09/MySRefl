@@ -4,7 +4,7 @@
 #include <string_view>
 #include <vector>
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 struct Attr {
   std::string ns;
   std::string name;
@@ -113,4 +113,4 @@ struct TypeMeta {
   // public, non-friend, non-delete
   bool HaveAnyOutputField() const;
 };
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

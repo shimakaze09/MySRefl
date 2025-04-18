@@ -4,7 +4,7 @@
 
 #include "NamedValue.h"
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 // Elems is named value
 template <typename... Elems>
 struct ElemList {
@@ -54,6 +54,6 @@ struct ElemList {
 #define MySRefl_ElemList_GetByValue(list, value) \
   list.Get<list.FindValue(value)>()
 };
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl
 
 #include "detail/ElemList.inl"

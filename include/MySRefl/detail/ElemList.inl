@@ -4,7 +4,7 @@
 
 #include "../Util.h"
 
-namespace My::MySRefl::detail {
+namespace Smkz::MySRefl::detail {
 template <typename List, typename Func, typename Acc, std::size_t... Ns>
 constexpr auto Accumulate(const List& list, Func&& func, Acc acc,
                           std::index_sequence<Ns...>) {
@@ -35,9 +35,9 @@ struct IsSameNameWith {
   template <typename T>
   struct Ttype : std::is_same<typename T::TName, Name> {};
 };
-}  // namespace My::MySRefl::detail
+}  // namespace Smkz::MySRefl::detail
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 template <typename... Elems>
 template <typename Init, typename Func>
 constexpr auto ElemList<Elems...>::Accumulate(Init init, Func&& func) const {
@@ -64,18 +64,7 @@ constexpr std::size_t ElemList<Elems...>::FindIf(Func&& func) const {
 template <typename... Elems>
 template <typename Name>
 constexpr const auto& ElemList<Elems...>::Find(Name) const {
-  /*static_assert(Contains<Name>());
-  constexpr std::size_t idx = []() {
-          constexpr decltype(Name::View()) names[]{ Elems::name... };
-          for (std::size_t i = 0; i < sizeof...(Elems); i++) {
-                  if (Name::View() == names[i])
-                          return i;
-          }
-          return static_cast<std::size_t>(-1);
-  }();
-  static_assert(idx != static_cast<std::size_t>(-1));
-  return Get<idx>();*/
-  return Get<My::FindIf_v<TypeList<Elems...>,
+  return Get<Smkz::FindIf_v<TypeList<Elems...>,
                           detail::IsSameNameWith<Name>::template Ttype>>();
 }
 
@@ -152,4 +141,4 @@ constexpr auto ElemList<Elems...>::Insert(Elem e) const {
   else
     return Push(e);
 }
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

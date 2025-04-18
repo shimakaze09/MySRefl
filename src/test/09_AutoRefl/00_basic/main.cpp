@@ -5,11 +5,11 @@
 // building)
 #include "Vec.h"
 
-using namespace My::Nested;
+using namespace Smkz::Nested;
 
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 int main() {

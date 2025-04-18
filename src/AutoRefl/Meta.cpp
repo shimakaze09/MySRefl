@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 
 std::string Attr::GenerateName(bool withoutQuatation) const {
   auto rst = ns.empty() ? name : ns + "::" + name;

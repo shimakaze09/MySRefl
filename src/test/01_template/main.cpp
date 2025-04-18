@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 template <typename T>
@@ -14,7 +14,7 @@ struct [[size(8)]] Point {
 };
 
 template <typename T>
-struct My::MySRefl::TypeInfo<Point<T>> : TypeInfoBase<Point<T>> {
+struct Smkz::MySRefl::TypeInfo<Point<T>> : TypeInfoBase<Point<T>> {
   static constexpr AttrList attrs = {
       Attr{TSTR("size"), 8},
   };

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace My::MySRefl::detail {
+namespace Smkz::MySRefl::detail {
 template <typename TI, typename U, typename Func>
 constexpr void ForEachNonVirtualVarOf(TI info, U&& obj, Func&& func) {
   info.fields.ForEach([&](const auto& field) {
@@ -15,9 +15,9 @@ constexpr void ForEachNonVirtualVarOf(TI info, U&& obj, Func&& func) {
     }
   });
 }
-}  // namespace My::MySRefl::detail
+}  // namespace Smkz::MySRefl::detail
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 template <typename T, typename... Bases>
 template <typename Derived>
 constexpr auto&& TypeInfoBase<T, Bases...>::Forward(
@@ -103,4 +103,4 @@ constexpr void TypeInfoBase<T, Bases...>::ForEachVarOf(U&& obj, Func&& func) {
   detail::ForEachNonVirtualVarOf(TypeInfo<Type>{}, std::forward<U>(obj),
                                  std::forward<Func>(func));
 }
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

@@ -8,7 +8,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 // ==============
@@ -24,7 +24,7 @@ struct [[size(8)]] Point {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
+struct Smkz::MySRefl::TypeInfo<Point> : TypeInfoBase<Point> {
   static constexpr char name[6] = "Point";
   static constexpr AttrList attrs = {
       Attr{TSTR("size"), 8},
@@ -94,7 +94,7 @@ struct Data {
 };
 
 template <typename T>
-struct My::MySRefl::TypeInfo<Data<T>> : TypeInfoBase<Data<T>> {
+struct Smkz::MySRefl::TypeInfo<Data<T>> : TypeInfoBase<Data<T>> {
   // [!] all instance types have the same name
   static constexpr char name[5] = "Data";
   static constexpr AttrList attrs = {};
@@ -139,7 +139,7 @@ struct D : B, C {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
+struct Smkz::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
   static constexpr char name[2] = "A";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -148,7 +148,7 @@ struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
+struct Smkz::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
   static constexpr char name[2] = "B";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -157,7 +157,7 @@ struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
+struct Smkz::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
   static constexpr char name[2] = "C";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -166,7 +166,7 @@ struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
+struct Smkz::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
   static constexpr char name[2] = "D";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -224,7 +224,7 @@ enum class [[enum_attr("enum_attr_value")]] Color {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
+struct Smkz::MySRefl::TypeInfo<Color> : TypeInfoBase<Color> {
   static constexpr char name[6] = "Color";
   static constexpr AttrList attrs = {
       Attr{TSTR("enum_attr"), "enum_attr_value"},
@@ -324,7 +324,7 @@ struct FuncList {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<FuncList> : TypeInfoBase<FuncList> {
+struct Smkz::MySRefl::TypeInfo<FuncList> : TypeInfoBase<FuncList> {
   static constexpr char name[9] = "FuncList";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -363,7 +363,7 @@ struct VD : VB, VC {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<VA> : TypeInfoBase<VA> {
+struct Smkz::MySRefl::TypeInfo<VA> : TypeInfoBase<VA> {
   static constexpr char name[3] = "VA";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -372,7 +372,7 @@ struct My::MySRefl::TypeInfo<VA> : TypeInfoBase<VA> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<VB> : TypeInfoBase<VB, Base<VA, true>> {
+struct Smkz::MySRefl::TypeInfo<VB> : TypeInfoBase<VB, Base<VA, true>> {
   static constexpr char name[3] = "VB";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -381,7 +381,7 @@ struct My::MySRefl::TypeInfo<VB> : TypeInfoBase<VB, Base<VA, true>> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<VC> : TypeInfoBase<VC, Base<VA, true>> {
+struct Smkz::MySRefl::TypeInfo<VC> : TypeInfoBase<VC, Base<VA, true>> {
   static constexpr char name[3] = "VC";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
@@ -390,7 +390,7 @@ struct My::MySRefl::TypeInfo<VC> : TypeInfoBase<VC, Base<VA, true>> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<VD> : TypeInfoBase<VD, Base<VB>, Base<VC>> {
+struct Smkz::MySRefl::TypeInfo<VD> : TypeInfoBase<VD, Base<VB>, Base<VC>> {
   static constexpr char name[3] = "VD";
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {

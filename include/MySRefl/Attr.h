@@ -2,7 +2,7 @@
 
 #include "NamedValue.h"
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 // [summary]
 // attribute for field, class, enum
 // [member]
@@ -15,6 +15,6 @@ Attr(Name) -> Attr<Name, void>;
 
 template <typename Name, typename Value>
 Attr(Name, Value) -> Attr<Name, Value>;
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl
 
 #include "detail/Attr.inl"

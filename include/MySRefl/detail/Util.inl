@@ -3,7 +3,7 @@
 #include <cassert>
 #include <utility>
 
-namespace My::MySRefl::detail {
+namespace Smkz::MySRefl::detail {
 template <typename T, template <typename...> class U>
 struct IsInstance : std::false_type {};
 template <template <typename...> class U, typename... Ts>
@@ -31,9 +31,9 @@ struct ConstructorWrapper<T(Args...)> {
     });
   }
 };
-}  // namespace My::MySRefl::detail
+}  // namespace Smkz::MySRefl::detail
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 // Signature : T(Args...)
 // ->
 // void(*)(T*, Args...)
@@ -49,4 +49,4 @@ constexpr auto WrapDestructor() {
     ptr->~T();
   });
 }
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

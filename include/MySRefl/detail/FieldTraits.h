@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace My::MySRefl::detail {
+namespace Smkz::MySRefl::detail {
 template <typename T>
 struct FieldTraits;
 
@@ -27,4 +27,4 @@ struct FieldTraits<T*> : FieldTraitsBase<void, T, true, std::is_function_v<T>> {
 // enum / static constexpr
 template <typename T>
 struct FieldTraits : FieldTraitsBase<void, T, true, false> {};
-}  // namespace My::MySRefl::detail
+}  // namespace Smkz::MySRefl::detail

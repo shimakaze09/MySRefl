@@ -5,7 +5,7 @@
 #include "MetaGenerator.h"
 #include "TypeInfoGenerator.h"
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 string ReadFileIntoString(const char* filename) {

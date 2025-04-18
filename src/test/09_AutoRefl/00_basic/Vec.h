@@ -1,6 +1,6 @@
 #include <tuple>
 
-namespace My::Nested {
+namespace Smkz::Nested {
 template <typename T>  // template
 struct [[size(sizeof(T))]] /*compile-time attr*/ Vec {
   // default constructor
@@ -27,7 +27,7 @@ struct [[size(sizeof(T))]] /*compile-time attr*/ Vec {
     return lhs.x * rhs.x + lhs.y * rhs.y;
   }
 };
-}  // namespace My::Nested
+}  // namespace Smkz::Nested
 
 // CMake will generate this file before building
 // it contains the reflection declaration of Vec

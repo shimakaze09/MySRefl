@@ -6,11 +6,11 @@
 #define TSTR(s)                                                  \
   ([] {                                                          \
     constexpr std::basic_string_view str{s};                     \
-    return My::detail::TStr<My::detail::fcstr<                   \
+    return Smkz::detail::TStr<Smkz::detail::fcstr<                   \
         typename decltype(str)::value_type, str.size()>{str}>{}; \
   }())
 
-namespace My::detail {
+namespace Smkz::detail {
 template <typename C, std::size_t N>
 struct fcstr {
   using value_type = C;
@@ -86,9 +86,9 @@ constexpr void NV_Var(TI, U&& u, F&& f) {
       NV_Var(b.info, b.info.Forward(std::forward<U>(u)), std::forward<F>(f));
   });
 }
-}  // namespace My::detail
+}  // namespace Smkz::detail
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 template <class Name>
 struct NamedValueBase {
   using TName = Name;
@@ -338,4 +338,4 @@ template <class Name>
 Attr(Name) -> Attr<Name, void>;
 template <class Name, class T>
 Field(Name, T) -> Field<Name, T, AttrList<>>;
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

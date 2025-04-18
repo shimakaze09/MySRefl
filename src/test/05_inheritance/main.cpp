@@ -3,7 +3,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace My::MySRefl;
+using namespace Smkz::MySRefl;
 using namespace std;
 
 struct A {
@@ -20,7 +20,7 @@ struct D : B, C {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
+struct Smkz::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("a"), &Type::a},
@@ -28,7 +28,7 @@ struct My::MySRefl::TypeInfo<A> : TypeInfoBase<A> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
+struct Smkz::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("b"), &Type::b},
@@ -36,7 +36,7 @@ struct My::MySRefl::TypeInfo<B> : TypeInfoBase<B, Base<A>> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
+struct Smkz::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("c"), &Type::c},
@@ -44,7 +44,7 @@ struct My::MySRefl::TypeInfo<C> : TypeInfoBase<C, Base<A>> {
 };
 
 template <>
-struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
+struct Smkz::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
   static constexpr AttrList attrs = {};
   static constexpr FieldList fields = {
       Field{TSTR("d"), &Type::d},

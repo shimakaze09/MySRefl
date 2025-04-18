@@ -4,7 +4,7 @@
 
 #include "Meta.h"
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 class TypeInfoGenerator {
  public:
   enum class ConstMode { Constepxr, Const, NonConst };
@@ -38,4 +38,4 @@ class TypeInfoGenerator {
  private:
   Config config;
 };
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl

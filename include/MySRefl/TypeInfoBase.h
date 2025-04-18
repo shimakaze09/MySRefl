@@ -4,7 +4,7 @@
 
 #include "BaseList.h"
 
-namespace My::MySRefl {
+namespace Smkz::MySRefl {
 template <typename T, typename... Bases>
 struct TypeInfoBase {
   using Type = T;
@@ -26,6 +26,6 @@ struct TypeInfoBase {
   template <typename U, typename Func>
   static constexpr void ForEachVarOf(U&& obj, Func&& func);
 };
-}  // namespace My::MySRefl
+}  // namespace Smkz::MySRefl
 
 #include "detail/TypeInfoBase.inl"
