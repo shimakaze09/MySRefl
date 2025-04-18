@@ -3,6 +3,7 @@
 //
 
 #include <MySRefl/MySRefl.h>
+
 #include <iostream>
 
 using namespace My::MySRefl;
@@ -18,13 +19,10 @@ struct Typeof;
 template <typename Str>
 using Typeof_t = typename Typeof<Str>::type;
 }  // namespace MyMeta
-
 template <typename T>
 struct is_std_tuple : std::false_type {};
-
 template <typename... Ts>
 struct is_std_tuple<std::tuple<Ts...>> : std::true_type {};
-
 template <typename T>
 constexpr bool is_std_tuple_v = is_std_tuple<T>::value;
 

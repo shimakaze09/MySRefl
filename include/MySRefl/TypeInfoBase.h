@@ -6,7 +6,7 @@
 
 #include "BaseList.h"
 
-#include <MyTemplate/Name.h>
+#include <MyTemplate/Name.hpp>
 
 namespace My::MySRefl {
 template <typename T, typename... Bases>

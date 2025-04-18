@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <MyTemplate/TStr.h>
+#include <MyTemplate/TStr.hpp>
 
 #include <string_view>
 

@@ -6,7 +6,7 @@
 
 #include "../Util.h"
 
-#include <MyTemplate/TypeList.h>
+#include <MyTemplate/TypeList.hpp>
 
 namespace My::MySRefl::detail {
 template <typename List, typename Func, typename Acc, std::size_t... Ns>
