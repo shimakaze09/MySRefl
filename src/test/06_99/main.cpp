@@ -1,7 +1,3 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #ifdef __clang__
 #include <MySRefl_99_clang.h>
 #else
@@ -24,7 +20,6 @@ struct [[size(8)]] Point {
   [[info("hello")]]
   float y;
   static constexpr std::size_t id = 1024;
-
   float Sum() const { return x + y; }
 };
 
@@ -59,8 +54,7 @@ void test_basic() {
     cout << field.name << endl;
     field.attrs.ForEach([](auto attr) {
       cout << attr.name;
-      if constexpr (attr.has_value)
-        cout << ": " << attr.value;
+      if constexpr (attr.has_value) cout << ": " << attr.value;
       cout << endl;
     });
   });
@@ -81,8 +75,7 @@ void test_basic() {
 
   TypeInfo<Point>::fields.ForEach([p](auto field) {
     if constexpr (field.is_func) {
-      if (field.name != "Sum")
-        return;
+      if (field.name != "Sum") return;
       cout << (p.*(field.value))() << endl;
     }
   });
@@ -135,15 +128,12 @@ void test_template() {
 struct A {
   float a;
 };
-
 struct B : A {
   float b;
 };
-
 struct C : A {
   float c;
 };
-
 struct D : B, C {
   float d;
 };
@@ -190,8 +180,7 @@ void test_inheritance() {
        << "====================" << endl;
 
   TypeInfo<D>::DFS_ForEach([](auto t, std::size_t depth) {
-    for (std::size_t i = 0; i < depth; i++)
-      cout << "  ";
+    for (std::size_t i = 0; i < depth; i++) cout << "  ";
     cout << t.name << endl;
   });
 
@@ -331,7 +320,6 @@ void test_enum() {
 // ==============
 struct FuncList {
   void Func0(float a, float b) {}
-
   void Func1(int x = 1) {}
 };
 
@@ -343,9 +331,8 @@ struct My::MySRefl::TypeInfo<FuncList> : TypeInfoBase<FuncList> {
       Field{TSTR("Func0"), &Type::Func0},
       Field{TSTR("Func1"), &Type::Func1,
             AttrList{
-                Attr{TSTR("default_functions"), std::tuple{[](Type* this_) {
-                       return this_->Func1();
-                     }}},
+                Attr{TSTR("default_functions"),
+                     std::tuple{[](Type* this_) { return this_->Func1(); }}},
             }},
   };
 };
@@ -365,15 +352,12 @@ void test_function() {
 struct VA {
   float a;
 };
-
 struct VB : virtual VA {
   float b;
 };
-
 struct VC : virtual VA {
   float c;
 };
-
 struct VD : VB, VC {
   float d;
 };
@@ -432,8 +416,7 @@ void test_virtual() {
 
   cout << "[Tree]" << endl;
   TypeInfo<VD>::DFS_ForEach([](auto t, std::size_t depth) {
-    for (std::size_t i = 0; i < depth; i++)
-      cout << "  ";
+    for (std::size_t i = 0; i < depth; i++) cout << "  ";
     cout << t.name << endl;
   });
 

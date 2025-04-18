@@ -1,7 +1,3 @@
-//
-// Created by Admin on 12/03/2025.
-//
-
 #include <MySRefl/MySRefl.h>
 
 // Vec's definition
@@ -29,8 +25,7 @@ int main() {
 
   TypeInfo<Vec<float>>::attrs.ForEach([](auto attr) {
     cout << "name  : " << attr.name << endl;
-    if constexpr (!attr.has_value)
-      cout << "value : " << attr.value << endl;
+    if constexpr (!attr.has_value) cout << "value : " << attr.value << endl;
   });
 
   TypeInfo<Vec<float>>::ForEachVarOf(

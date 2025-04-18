@@ -1,12 +1,7 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #include <MySRefl/MySRefl.h>
 
-#include <iostream>
-
 #include <cassert>
+#include <iostream>
 
 using namespace My::MySRefl;
 using namespace std;
@@ -18,7 +13,6 @@ struct [[size(8)]] Point {
   float y;
 
   float Sum() const { return x + y; }
-
   float Sum(float z) const { return x + y + z; }
 
   static constexpr std::size_t id = 1024;
@@ -49,8 +43,7 @@ int main() {
 
   TypeInfo<Point>::fields.ForEach([p](auto field) {
     if constexpr (field.is_func) {
-      if (field.name != "Sum")
-        return;
+      if (field.name != "Sum") return;
       if constexpr (field.ValueTypeIsSameWith(
                         static_cast<float (Point::*)() const>(&Point::Sum)))
         cout << (p.*(field.value))() << endl;

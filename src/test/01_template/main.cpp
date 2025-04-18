@@ -1,7 +1,3 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #include <MySRefl/MySRefl.h>
 
 #include <iostream>
@@ -41,8 +37,7 @@ int main() {
     cout << field.name << endl;
     field.attrs.ForEach([](auto attr) {
       cout << "name  : " << attr.name << endl;
-      if constexpr (attr.has_value)
-        cout << "value : " << attr.value << endl;
+      if constexpr (attr.has_value) cout << "value : " << attr.value << endl;
     });
   });
 
@@ -53,8 +48,7 @@ int main() {
 
   TypeInfo<Point<float>>::attrs.ForEach([](auto attr) {
     cout << "name  : " << attr.name << endl;
-    if constexpr (attr.has_value)
-      cout << "value : " << attr.value << endl;
+    if constexpr (attr.has_value) cout << "value : " << attr.value << endl;
   });
 
   TypeInfo<Point<float>>::ForEachVarOf(p, [](auto field, auto&& var) {

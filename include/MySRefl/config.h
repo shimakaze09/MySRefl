@@ -1,7 +1,3 @@
-//
-// Created by Admin on 27/03/2025.
-//
-
 #pragma once
 
 // AutoRefl will use these names

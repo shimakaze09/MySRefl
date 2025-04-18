@@ -4,32 +4,38 @@
 
 #include <MySRefl/MySRefl.h>
 
-template<typename T>
-struct My::MySRefl::TypeInfo<My::Nested::Vec<T>> :
-    TypeInfoBase<My::Nested::Vec<T>>
-{
-    static constexpr AttrList attrs = {
-        Attr {TSTR("size"), sizeof(T)},
-    };
-    static constexpr FieldList fields = {
-        Field {TSTR(MyMeta::constructor), WrapConstructor<My::Nested::Vec<T>()>()},
-        Field {TSTR(MyMeta::constructor), WrapConstructor<My::Nested::Vec<T>(T, T)>()},
-        Field {TSTR(MyMeta::destructor), WrapDestructor<My::Nested::Vec<T>>()},
-        Field {TSTR("x"), &My::Nested::Vec<T>::x, AttrList {
-            Attr {TSTR("not_serialize")},
-        }},
-        Field {TSTR("y"), &My::Nested::Vec<T>::y, AttrList {
-            Attr {TSTR("info"), "hello"},
-            Attr {TSTR("maximum"), 10.f},
-        }},
-        Field {TSTR("num"), &My::Nested::Vec<T>::num},
-        Field {TSTR("Sum"), static_cast<float(My::Nested::Vec<T>::*)()const>(&My::Nested::Vec<T>::Sum)},
-        Field {TSTR("Sum"), static_cast<float(My::Nested::Vec<T>::*)(float, float)const>(&My::Nested::Vec<T>::Sum), AttrList {
-            Attr {TSTR(MyMeta::default_functions), std::tuple {
-                [](My::Nested::Vec<T> const* this_, float z){ return this_->Sum(std::forward<float>(z)); }
+template <typename T>
+struct My::MySRefl::TypeInfo<My::Nested::Vec<T>>
+    : TypeInfoBase<My::Nested::Vec<T>> {
+  static constexpr AttrList attrs = {
+      Attr{TSTR("size"), sizeof(T)},
+  };
+  static constexpr FieldList fields = {
+      Field{TSTR(MyMeta::constructor), WrapConstructor<My::Nested::Vec<T>()>()},
+      Field{TSTR(MyMeta::constructor),
+            WrapConstructor<My::Nested::Vec<T>(T, T)>()},
+      Field{TSTR(MyMeta::destructor), WrapDestructor<My::Nested::Vec<T>>()},
+      Field{TSTR("x"), &My::Nested::Vec<T>::x,
+            AttrList{
+                Attr{TSTR("not_serialize")},
             }},
-        }},
-        Field {TSTR("Dot"), &My::Nested::Vec<T>::Dot},
-    };
+      Field{TSTR("y"), &My::Nested::Vec<T>::y,
+            AttrList{
+                Attr{TSTR("info"), "hello"},
+                Attr{TSTR("maximum"), 10.f},
+            }},
+      Field{TSTR("num"), &My::Nested::Vec<T>::num},
+      Field{TSTR("Sum"), static_cast<float (My::Nested::Vec<T>::*)() const>(
+                             &My::Nested::Vec<T>::Sum)},
+      Field{TSTR("Sum"),
+            static_cast<float (My::Nested::Vec<T>::*)(float, float) const>(
+                &My::Nested::Vec<T>::Sum),
+            AttrList{
+                Attr{TSTR(MyMeta::default_functions),
+                     std::tuple{[](My::Nested::Vec<T> const* this_, float z) {
+                       return this_->Sum(std::forward<float>(z));
+                     }}},
+            }},
+      Field{TSTR("Dot"), &My::Nested::Vec<T>::Dot},
+  };
 };
-

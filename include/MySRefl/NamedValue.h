@@ -1,11 +1,6 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #pragma once
 
 #include <MyTemplate/TStr.hpp>
-
 #include <string_view>
 
 namespace My::MySRefl {
@@ -52,7 +47,6 @@ struct NamedValue : NamedValueBase<Name, T> {
 template <typename Name>
 struct NamedValue<Name, void> : NamedValueBase<Name, void> {
   constexpr NamedValue(Name) {}
-
   template <typename U>
   constexpr bool operator==(U) const {
     return false;

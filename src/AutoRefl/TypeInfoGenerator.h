@@ -1,10 +1,7 @@
-//
-// Created by Admin on 26/03/2025.
-//
-
 #pragma once
 
 #include <MySRefl/config.h>
+
 #include "Meta.h"
 
 namespace My::MySRefl {
@@ -34,7 +31,6 @@ class TypeInfoGenerator {
   };
 
   TypeInfoGenerator() = default;
-
   TypeInfoGenerator(Config config) : config{std::move(config)} {}
 
   std::string Generate(const std::vector<TypeMeta>& typeMetas);

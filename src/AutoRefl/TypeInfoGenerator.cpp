@@ -1,7 +1,3 @@
-//
-// Created by Admin on 26/03/2025.
-//
-
 #include "TypeInfoGenerator.h"
 
 #include <sstream>
@@ -36,8 +32,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
         for (std::size_t i = 0; i < publicBaseIndice.size(); i++) {
           const auto& base = typeMeta.bases[publicBaseIndice[i]];
           ss << indent << indent << base.GenerateText();
-          if (i != publicBaseIndice.size() - 1)
-            ss << ",";
+          if (i != publicBaseIndice.size() - 1) ss << ",";
           ss << endl;
         }
         ss << indent;
@@ -185,8 +180,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
               } else if (field.IsMemberFunction()) {
                 auto qualifiers = field.GenerateQualifiers();
                 bool isPointer = qualifiers.find('&') == std::string::npos;
-                if (isPointer)
-                  qualifiers += "*";
+                if (isPointer) qualifiers += "*";
 
                 auto ftname = tname + " " + qualifiers;
                 ss << indent << indent << indent << indent << "[](" << ftname
@@ -199,8 +193,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
               } else {  // static
                 auto qualifiers = field.GenerateQualifiers();
                 bool isPointer = qualifiers.find('&') == std::string::npos;
-                if (isPointer)
-                  qualifiers += "*";
+                if (isPointer) qualifiers += "*";
 
                 auto ftname = tname + " " + qualifiers;
                 ss << indent << indent << indent << indent << "[]("
@@ -208,8 +201,7 @@ string TypeInfoGenerator::Generate(const vector<TypeMeta>& typeMetas) {
                    << tname << "::" << field.name << "("
                    << field.GenerateForwardArgumentList(num) << "); }";
               }
-              if (i != defaultParameterNum)
-                ss << ",";
+              if (i != defaultParameterNum) ss << ",";
               ss << endl;
             }
             ss << indent << indent << indent << "}}," << endl;  // attr

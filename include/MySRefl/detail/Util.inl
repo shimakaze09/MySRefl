@@ -1,7 +1,3 @@
-//
-// Created by Admin on 12/03/2025.
-//
-
 #pragma once
 
 #include <cassert>
@@ -10,7 +6,6 @@
 namespace My::MySRefl::detail {
 template <typename T, template <typename...> class U>
 struct IsInstance : std::false_type {};
-
 template <template <typename...> class U, typename... Ts>
 struct IsInstance<U<Ts...>, U> : std::true_type {};
 
@@ -25,7 +20,6 @@ struct IntegerSequenceTraits<std::integer_sequence<T, N0, Ns...>> {
 
 template <typename Signature>
 struct ConstructorWrapper;
-
 template <typename T, typename... Args>
 struct ConstructorWrapper<T(Args...)> {
   static constexpr auto run() {

@@ -1,12 +1,7 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #include <MySRefl/MySRefl.h>
 
-#include <iostream>
-
 #include <cassert>
+#include <iostream>
 
 using namespace My::MySRefl;
 using namespace std;
@@ -14,15 +9,12 @@ using namespace std;
 struct A {
   float a;
 };
-
 struct B : A {
   float b;
 };
-
 struct C : A {
   float c;
 };
-
 struct D : B, C {
   float d;
 };
@@ -61,8 +53,7 @@ struct My::MySRefl::TypeInfo<D> : TypeInfoBase<D, Base<B>, Base<C>> {
 
 int main() {
   TypeInfo<D>::DFS_ForEach([](auto t, std::size_t depth) {
-    for (std::size_t i = 0; i < depth; i++)
-      cout << "  ";
+    for (std::size_t i = 0; i < depth; i++) cout << "  ";
     cout << t.name << endl;
   });
 

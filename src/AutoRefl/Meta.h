@@ -1,7 +1,3 @@
-//
-// Created by Admin on 26/03/2025.
-//
-
 #pragma once
 
 #include <string>
@@ -26,7 +22,7 @@ enum class AccessSpecifier { PUBLIC, PROTECTED, PRIVATE, DEFAULT };
 using DeclSpecifier = std::string;
 
 struct Parameter {
-  //std::vector<Attr> attrs;
+  // std::vector<Attr> attrs;
   bool isPacked{false};
   std::string type;  // typename, class, ...
   std::string name;
@@ -74,9 +70,11 @@ struct Field {
   std::string GenerateFunctionType(std::string_view obj) const;
   std::string GenerateInitFunction() const;
   std::size_t GetDefaultParameterNum() const;
-  // arg_type0 arg_name0, arg_type1 arg_name1, ..., arg_type(num-1) arg_name(num-1)
+  // arg_type0 arg_name0, arg_type1 arg_name1, ..., arg_type(num-1)
+  // arg_name(num-1)
   std::string GenerateNamedParameterList(std::size_t num) const;
-  // std::forward<arg_type0>(arg_name0), std::forward<arg_type0>(arg_name1), ..., std::forward<arg_type0>(arg_name(num-1))
+  // std::forward<arg_type0>(arg_name0), std::forward<arg_type0>(arg_name1),
+  // ..., std::forward<arg_type0>(arg_name(num-1))
   std::string GenerateForwardArgumentList(std::size_t num) const;
   std::string GenerateQualifiers() const;
 };

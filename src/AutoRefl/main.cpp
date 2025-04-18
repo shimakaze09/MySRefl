@@ -1,26 +1,20 @@
-//
-// Created by Admin on 12/03/2025.
-//
-
-#include "MetaGenerator.h"
-#include "TypeInfoGenerator.h"
-
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+#include "MetaGenerator.h"
+#include "TypeInfoGenerator.h"
 
 using namespace My::MySRefl;
 using namespace std;
 
 string ReadFileIntoString(const char* filename) {
   ifstream ifile(filename);
-  if (!ifile.is_open())
-    return "";
+  if (!ifile.is_open()) return "";
 
   ostringstream buf;
   char ch;
-  while (buf && ifile.get(ch))
-    buf.put(ch);
+  while (buf && ifile.get(ch)) buf.put(ch);
   return buf.str();
 }
 
@@ -40,8 +34,7 @@ int main(int argc, char** argv) {
   auto typeMetas = metaGenerator.Parse(code);
   auto rst = typeinfoGenerator.Generate(typeMetas);
   auto curout = ReadFileIntoString(inputPath.c_str());
-  if (curout == rst)
-    return 0;
+  if (curout == rst) return 0;
 
   ofstream out(outputPath);
   if (!out.is_open()) {

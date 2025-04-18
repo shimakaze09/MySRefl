@@ -1,8 +1,5 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #include <MySRefl/MySRefl.h>
+
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -12,7 +9,6 @@ using namespace My::MySRefl;
 struct Vec {
   float x;
   float y;
-
   float norm() const { return std::sqrt(x * x + y * y); }
 };
 

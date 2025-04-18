@@ -1,7 +1,3 @@
-//
-// Created by Admin on 2/04/2025.
-//
-
 #include <MySRefl/MySRefl.h>
 
 #include <iostream>
@@ -19,6 +15,7 @@ struct Typeof;
 template <typename Str>
 using Typeof_t = typename Typeof<Str>::type;
 }  // namespace MyMeta
+
 template <typename T>
 struct is_std_tuple : std::false_type {};
 template <typename... Ts>

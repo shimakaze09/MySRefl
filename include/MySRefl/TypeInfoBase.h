@@ -1,12 +1,8 @@
-//
-// Created by Admin on 11/03/2025.
-//
-
 #pragma once
 
-#include "BaseList.h"
-
 #include <MyTemplate/Name.hpp>
+
+#include "BaseList.h"
 
 namespace My::MySRefl {
 template <typename T, typename... Bases>

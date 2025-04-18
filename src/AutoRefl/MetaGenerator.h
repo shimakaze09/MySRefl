@@ -1,12 +1,8 @@
-//
-// Created by Admin on 26/03/2025.
-//
-
 #pragma once
 
-#include "Meta.h"
-
 #include <memory>
+
+#include "Meta.h"
 
 namespace My::MySRefl {
 class MetaGenerator {

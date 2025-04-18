@@ -1,7 +1,3 @@
-//
-// Created by Admin on 26/03/2025.
-//
-
 #include "MetaGenerator.h"
 
 #include <MyANTLR/ParserCpp14/CPP14Lexer.h>
@@ -79,14 +75,14 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     std::vector<Attr> attrs;
     for (auto* ctxAttributeSpecifier : ctx->attributeSpecifier()) {
       std::vector<Attr> partialAttrs = visit(ctxAttributeSpecifier);
-      for (auto& attr : partialAttrs)
-        attrs.push_back(std::move(attr));
+      for (auto& attr : partialAttrs) attrs.push_back(std::move(attr));
     }
     return attrs;
   }
 
   // attributeSpecifier:
-  //     LeftBracket LeftBracket(Using attributeNamespace Colon) ? attributeList ? RightBracket RightBracket
+  //     LeftBracket LeftBracket(Using attributeNamespace Colon) ? attributeList
+  //     ? RightBracket RightBracket
   //	   | alignmentspecifier
   antlrcpp::Any visitAttributeSpecifier(
       CPP14Parser::AttributeSpecifierContext* ctx) override final {
@@ -99,8 +95,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
       }
       if (ctx->attributeNamespace()) {
         const std::string ns = ctx->attributeNamespace()->getText();
-        for (auto& attr : attrs)
-          attr.ns = ns;
+        for (auto& attr : attrs) attr.ns = ns;
       }
     }
 
@@ -133,8 +128,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
         ss << "template<";
         for (std::size_t i = 0; i < tparams.size(); i++) {
           ss << tparams[i].GenerateParameterName();
-          if (i != tparams.size() - 1)
-            ss << ", ";
+          if (i != tparams.size() - 1) ss << ", ";
         }
         ss << "> class";
         parameter.type = ss.str();
@@ -143,10 +137,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     } else
       assert(false);
 
-    if (ctx->Ellipsis())
-      parameter.isPacked = true;
-    if (ctx->Identifier())
-      parameter.name = ctx->Identifier()->getText();
+    if (ctx->Ellipsis()) parameter.isPacked = true;
+    if (ctx->Identifier()) parameter.name = ctx->Identifier()->getText();
     return parameter;
   }
 
@@ -168,11 +160,11 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
   }
 
   /*
-	 * parameterDeclaration:
-	 *     attributeSpecifierSeq? proDeclSpecifierSeq (
-	 *         (declarator | abstractDeclarator)? ( Assign initializerClause )?
-	 *     );
-	 */
+   * parameterDeclaration:
+   *     attributeSpecifierSeq? proDeclSpecifierSeq (
+   *         (declarator | abstractDeclarator)? ( Assign initializerClause )?
+   *     );
+   */
   antlrcpp::Any visitParameterDeclaration(
       CPP14Parser::ParameterDeclarationContext* ctx) override final {
     Parameter parameter;
@@ -217,20 +209,18 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
   }
 
   /*
-	 * enumSpecifier:
-	 *     enumHead LeftBrace (enumeratorList Comma?)? RightBrace;
-	 * enumHead:
-	 *    enumkey attributeSpecifierSeq? (
-	 *        nestedNameSpecifier? Identifier
-	 *    )? enumbase?;
-	 */
+   * enumSpecifier:
+   *     enumHead LeftBrace (enumeratorList Comma?)? RightBrace;
+   * enumHead:
+   *    enumkey attributeSpecifierSeq? (
+   *        nestedNameSpecifier? Identifier
+   *    )? enumbase?;
+   */
   antlrcpp::Any visitEnumSpecifier(
       CPP14Parser::EnumSpecifierContext* ctx) override final {
-    if (inTemplateType)
-      return {};
+    if (inTemplateType) return {};
 
-    if (!ctx->enumHead()->Identifier())
-      return {};
+    if (!ctx->enumHead()->Identifier()) return {};
 
     TypeMeta typeMeta;
 
@@ -264,7 +254,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     return fields;
   }
 
-  // enumeratorDefinition: enumerator attributeSpecifierSeq? (Assign constantExpression)?
+  // enumeratorDefinition: enumerator attributeSpecifierSeq? (Assign
+  // constantExpression)?
   antlrcpp::Any visitEnumeratorDefinition(
       CPP14Parser::EnumeratorDefinitionContext* ctx) override final {
     Field field;
@@ -286,8 +277,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     templateParameters.clear();
 
     if (rst.is<std::vector<Field>>()) {
-      for (auto& field : rst.as<std::vector<Field>>())
-        field.isTemplate = true;
+      for (auto& field : rst.as<std::vector<Field>>()) field.isTemplate = true;
     } else if (rst.is<Field>()) {
       Field field = rst;
       field.isTemplate = true;
@@ -309,8 +299,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 
   antlrcpp::Any visitClassSpecifier(
       CPP14Parser::ClassSpecifierContext* ctx) override final {
-    if (inTemplateType)
-      return {};
+    if (inTemplateType) return {};
 
     if (!accessSpecifiers.empty() &&
         accessSpecifiers.back() != AccessSpecifier::PUBLIC)
@@ -327,8 +316,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
                            .as<std::vector<Attr>>();
 
     typeMeta.templateParameters = std::move(templateParameters);
-    if (!typeMeta.templateParameters.empty())
-      inTemplateType = true;
+    if (!typeMeta.templateParameters.empty()) inTemplateType = true;
 
     if (ctx->classHead()->classKey()->getText() == "class") {
       accessSpecifiers.push_back(AccessSpecifier::PRIVATE);
@@ -366,12 +354,10 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     std::vector<Base> bases;
     for (auto* ctxBaseSpecifierX : ctx->baseSpecifierList()->baseSpecifierX()) {
       Base base;
-      if (ctxBaseSpecifierX->Ellipsis())
-        base.isPacked = true;
+      if (ctxBaseSpecifierX->Ellipsis()) base.isPacked = true;
       base.name =
           GetTextPro(ctxBaseSpecifierX->baseSpecifier()->baseTypeSpecifier());
-      if (ctxBaseSpecifierX->baseSpecifier()->Virtual())
-        base.isVirtual = true;
+      if (ctxBaseSpecifierX->baseSpecifier()->Virtual()) base.isVirtual = true;
       if (auto ctxAccessSpecifier =
               ctxBaseSpecifierX->baseSpecifier()->accessSpecifier()) {
         const auto accessSpecifier = ctxAccessSpecifier->getText();
@@ -410,14 +396,12 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     else if (ctx->originalNamespaceName()) {
       std::vector<std::string> curNamespaces =
           visitOriginalNamespaceName(ctx->originalNamespaceName());
-      for (auto& ns : curNamespaces)
-        namespaces.push_back(std::move(ns));
+      for (auto& ns : curNamespaces) namespaces.push_back(std::move(ns));
     }
 
     visit(ctx->declarationseq());
 
-    while (namespaces.size() > origNamespacesSize)
-      namespaces.pop_back();
+    while (namespaces.size() > origNamespacesSize) namespaces.pop_back();
 
     return {};
   }
@@ -465,8 +449,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     }
     if (ctx->attributeSpecifierSeq()) {
       std::vector<Attr> attrs = visit(ctx->attributeSpecifierSeq());
-      for (auto& attr : attrs)
-        seq.attrs.push_back(std::move(attr));
+      for (auto& attr : attrs) seq.attrs.push_back(std::move(attr));
     }
     return seq;
   }
@@ -477,10 +460,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
         ctx->staticAssertDeclaration() || ctx->usingDeclaration())
       return {};
 
-    if (ctx->declSpecifierSeq())
-      return visit(ctx->declSpecifierSeq());
-    if (ctx->templateDeclaration())
-      return visit(ctx->templateDeclaration());
+    if (ctx->declSpecifierSeq()) return visit(ctx->declSpecifierSeq());
+    if (ctx->templateDeclaration()) return visit(ctx->templateDeclaration());
     if (ctx->functionDefinition()) {
       Field field = visit(ctx->functionDefinition());
       return std::vector<Field>{field};
@@ -495,8 +476,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     }
     if (ctx->attributeSpecifierSeq()) {
       std::vector<Attr> attrs = visit(ctx->attributeSpecifierSeq());
-      for (auto& attr : attrs)
-        commonAttrs.push_back(std::move(attr));
+      for (auto& attr : attrs) commonAttrs.push_back(std::move(attr));
     }
 
     std::vector<Field> fields;
@@ -508,10 +488,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
         if (!accessSpecifiers.empty())
           field.accessSpecifier = accessSpecifiers.back();
         field.declSpecifiers = declSpecifiers;
-        if (field.IsStaticConstexprVariable())
-          field.mode = Field::Mode::Value;
-        for (const auto& attr : commonAttrs)
-          field.attrs.push_back(attr);
+        if (field.IsStaticConstexprVariable()) field.mode = Field::Mode::Value;
+        for (const auto& attr : commonAttrs) field.attrs.push_back(attr);
         fields.push_back(std::move(field));
       }
     }
@@ -530,13 +508,13 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
   }
 
   /*
-	 * memberDeclarator:
-	 * declarator (
-	 *     virtualSpecifierSeq? pureSpecifier?
-	 *     | braceOrEqualInitializer?
-	 * )
-	 * | Identifier? attributeSpecifierSeq? Colon constantExpression;
-	 */
+   * memberDeclarator:
+   * declarator (
+   *     virtualSpecifierSeq? pureSpecifier?
+   *     | braceOrEqualInitializer?
+   * )
+   * | Identifier? attributeSpecifierSeq? Colon constantExpression;
+   */
   antlrcpp::Any visitMemberDeclarator(
       CPP14Parser::MemberDeclaratorContext* ctx) override final {
     Declarator declarator;
@@ -579,8 +557,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 
     if (ctx->attributeSpecifierSeq()) {
       std::vector<Attr> attrs = visit(ctx->attributeSpecifierSeq());
-      for (auto& attr : attrs)
-        declarator.attrs.push_back(std::move(attr));
+      for (auto& attr : attrs) declarator.attrs.push_back(std::move(attr));
     }
 
     if (ctx->parametersAndQualifiers()) {
@@ -588,8 +565,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
       if (ctx->parametersAndQualifiers()->attributeSpecifierSeq()) {
         std::vector<Attr> attrs =
             visit(ctx->parametersAndQualifiers()->attributeSpecifierSeq());
-        for (auto& attr : attrs)
-          declarator.attrs.push_back(std::move(attr));
+        for (auto& attr : attrs) declarator.attrs.push_back(std::move(attr));
       }
       if (auto* ctxClause =
               ctx->parametersAndQualifiers()->parameterDeclarationClause()) {
@@ -627,8 +603,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
 
   antlrcpp::Any visitSimpleDeclaration(
       CPP14Parser::SimpleDeclarationContext* ctx) override final {
-    if (!ctx->initDeclaratorList())
-      return visitChildren(ctx);
+    if (!ctx->initDeclaratorList()) return visitChildren(ctx);
 
     std::vector<Attr> commonAttrs;
     std::vector<DeclSpecifier> declSpecifiers;
@@ -639,8 +614,7 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     }
     if (ctx->attributeSpecifierSeq()) {
       std::vector<Attr> attrs = visit(ctx->attributeSpecifierSeq());
-      for (auto& attr : attrs)
-        commonAttrs.push_back(std::move(attr));
+      for (auto& attr : attrs) commonAttrs.push_back(std::move(attr));
     }
 
     std::vector<Field> fields;
@@ -651,10 +625,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
       field.declSpecifiers = declSpecifiers;
       if (!accessSpecifiers.empty())
         field.accessSpecifier = accessSpecifiers.back();
-      if (field.IsStaticConstexprVariable())
-        field.mode = Field::Mode::Value;
-      for (const auto& attr : commonAttrs)
-        field.attrs.push_back(attr);
+      if (field.IsStaticConstexprVariable()) field.mode = Field::Mode::Value;
+      for (const auto& attr : commonAttrs) field.attrs.push_back(attr);
       fields.push_back(std::move(field));
     }
 
@@ -679,7 +651,8 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     return declarator;
   }
 
-  // functionDefinition: attributeSpecifierSeq ? proDeclSpecifierSeq ? declarator virtualSpecifierSeq ? functionBody;
+  // functionDefinition: attributeSpecifierSeq ? proDeclSpecifierSeq ?
+  // declarator virtualSpecifierSeq ? functionBody;
   antlrcpp::Any visitFunctionDefinition(
       CPP14Parser::FunctionDefinitionContext* ctx) override final {
     Declarator declarator = visit(ctx->declarator());
@@ -692,11 +665,9 @@ struct MetaGenerator::Impl : CPP14ParserBaseVisitor {
     if (ctx->proDeclSpecifierSeq()) {
       DeclSpecifierSeq seq = visit(ctx->proDeclSpecifierSeq());
       field.declSpecifiers = std::move(seq.declSpecifiers);
-      for (auto& attr : seq.attrs)
-        field.attrs.push_back(std::move(attr));
+      for (auto& attr : seq.attrs) field.attrs.push_back(std::move(attr));
     }
-    if (ctx->functionBody()->Delete())
-      field.initializer = "delete";
+    if (ctx->functionBody()->Delete()) field.initializer = "delete";
     return field;
   }
 };
